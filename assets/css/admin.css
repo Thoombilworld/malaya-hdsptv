@@ -123,6 +123,10 @@ body.admin-body {
 .badge-info { color: #1E40AF; background: #DBEAFE; }
 .badge-error { color: #991B1B; background: #FEE2E2; }
 
+
+.list-clean { list-style: none; margin: 0; padding: 0; }
+.list-clean li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.list-clean li:last-child { border-bottom: 0; padding-bottom: 0; }
 .table-wrap { overflow-x: auto; }
 .table {
   width: 100%;
