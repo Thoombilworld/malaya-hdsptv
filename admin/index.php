@@ -1,85 +1,102 @@
 <?php
 require __DIR__ . '/../bootstrap.php';
 hs_require_admin();
-$settings = hs_settings();
+require __DIR__ . '/_layout.php';
+
+$stats = [
+    ['label' => 'Published Today', 'value' => 0, 'badge' => 'badge-success', 'trend' => '+0% vs yesterday'],
+    ['label' => 'Pending Review', 'value' => 0, 'badge' => 'badge-warning', 'trend' => 'Queue healthy'],
+    ['label' => 'Active Breaking', 'value' => 0, 'badge' => 'badge-error', 'trend' => 'No active alerts'],
+    ['label' => 'Live Viewers', 'value' => 0, 'badge' => 'badge-info', 'trend' => 'Awaiting stream data'],
+];
+
+$recentStories = [];
+if (defined('HS_INSTALLED') && HS_INSTALLED) {
+    $query = "SELECT p.title, p.status, p.created_at, c.name AS category_name
+              FROM hs_posts p
+              LEFT JOIN hs_categories c ON c.id = p.category_id
+              ORDER BY p.created_at DESC
+              LIMIT 8";
+    $result = mysqli_query(hs_db(), $query);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $recentStories[] = $row;
+        }
+    }
+}
+
+hs_admin_shell_start('Admin Dashboard – HDSPTV', 'Dashboard', 'dashboard');
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Admin Dashboard – NEWS HDSPTV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-  <style>
-    body { margin:0; font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#020617; color:#E5E7EB; }
-    header { padding:12px 20px; border-bottom:1px solid #111827; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-    .logo { font-size:16px; font-weight:700; letter-spacing:.12em; }
-    nav a { margin-right:10px; font-size:12px; color:#9CA3AF; }
-    nav a:hover { color:#FACC15; }
-    .container { max-width:1100px; margin:18px auto; padding:0 16px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
-    .card { background:radial-gradient(circle at top left,#1E3A8A,#020617); border-radius:14px; padding:16px 18px; box-shadow:0 22px 60px rgba(15,23,42,0.75); }
-    .card h2 { margin:0 0 4px; font-size:15px; }
-    .card p { margin:0; font-size:12px; color:#E5E7EB; }
-    .pill { font-size:11px; text-transform:uppercase; letter-spacing:.16em; color:#FACC15; }
-    a.button { display:inline-flex; align-items:center; justify-content:center; padding:7px 14px; border-radius:999px; border:1px solid rgba(248,250,252,.18); font-size:12px; color:#E5E7EB; margin-top:6px; }
-    a.button:hover { border-color:#FACC15; text-decoration:none; }
-  </style>
-</head>
-<body>
-<header>
-  <div class="logo">NEWS HDSPTV • ADMIN</div>
-  <nav>
-    <a href="<?= hs_base_url('admin/index.php') ?>">Dashboard</a>
-    <a href="<?= hs_base_url('admin/homepage.php') ?>">Homepage</a>
-    <a href="<?= hs_base_url('admin/content/index.php') ?>">Content</a>
-    <a href="<?= hs_base_url('admin/seo.php') ?>">SEO</a>
-    <a href="<?= hs_base_url('admin/social.php') ?>">Social</a>
-    <a href="<?= hs_base_url('admin/ads.php') ?>">Ads</a>
-    <a href="<?= hs_base_url('admin/users.php') ?>">Staff</a>
-    <a href="<?= hs_base_url('admin/logs.php') ?>">Logs</a>
-    <a href="<?= hs_base_url('admin/logout.php') ?>" style="color:#FACC15;">Logout</a>
-  </nav>
-</header>
-<main class="container">
-  <div class="grid">
-    <section class="card">
-      <div class="pill">Content</div>
-      <h2>Articles & Categories</h2>
-      <p>Integrate your content manager here (posts, categories, tags).</p>
-      <a class="button" href="<?= hs_base_url('admin/content/index.php') ?>">Open Content Manager</a>
-    </section>
-    <section class="card">
-      <div class="pill">Homepage</div>
-      <h2>Homepage Layout</h2>
-      <p>Manage visibility of breaking ticker, featured slider, trending box, video, gallery, ads etc.</p>
-      <a class="button" href="<?= hs_base_url('admin/homepage.php') ?>">Homepage Manager</a>
-    </section>
-    <section class="card">
-      <div class="pill">SEO</div>
-      <h2>SEO Center</h2>
-      <p>Meta tags, keywords and default Open Graph data.</p>
-      <a class="button" href="<?= hs_base_url('admin/seo.php') ?>">SEO Settings</a>
-    </section>
-    <section class="card">
-      <div class="pill">Social</div>
-      <h2>Social Media</h2>
-      <p>Official HDSPTV links for Facebook, YouTube, Instagram, etc.</p>
-      <a class="button" href="<?= hs_base_url('admin/social.php') ?>">Social Links</a>
-    </section>
-    <section class="card">
-      <div class="pill">Ads</div>
-      <h2>Ad Spots</h2>
-      <p>Homepage top, sidebar and inline ads.</p>
-      <a class="button" href="<?= hs_base_url('admin/ads.php') ?>">Ads Manager</a>
-    </section>
-    <section class="card">
-      <div class="pill">Staff</div>
-      <h2>Staff Users</h2>
-      <p>Admin, editor and reporter accounts.</p>
-      <a class="button" href="<?= hs_base_url('admin/users.php') ?>">Staff Manager</a>
-    </section>
+
+<section class="grid-12" style="margin-bottom: 32px;">
+  <?php foreach ($stats as $item): ?>
+    <article class="card col-3 col-md-6 col-sm-12">
+      <span class="badge <?= $item['badge'] ?>"><?= htmlspecialchars($item['label']) ?></span>
+      <div class="kpi-value"><?= (int)$item['value'] ?></div>
+      <div class="kpi-label"><?= htmlspecialchars($item['trend']) ?></div>
+    </article>
+  <?php endforeach; ?>
+</section>
+
+<section class="grid-12" style="margin-bottom: 32px;">
+  <article class="card col-6 col-md-12">
+    <h2>Editorial Workflow Health</h2>
+    <p class="muted">Track draft → review → publish progression with clear ownership and response times.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+      <span class="badge badge-warning">Submitted</span>
+      <span class="badge badge-info">Under Review</span>
+      <span class="badge badge-warning">Fact Check</span>
+      <span class="badge badge-success">Approved</span>
+      <span class="badge badge-info">Scheduled</span>
+      <span class="badge badge-success">Published</span>
+    </div>
+  </article>
+
+  <article class="card col-6 col-md-12">
+    <h2>Operations & Stream Status</h2>
+    <p class="muted">Broadcast controls, stream health and emergency override are grouped in a single operational zone.</p>
+    <div style="display:grid; gap:10px; margin-top:12px;">
+      <div class="muted">System health: <span class="badge badge-success">Stable</span></div>
+      <div class="muted">Stream source: <span class="badge badge-info">Primary Offline</span></div>
+      <div class="muted">Backup source: <span class="badge badge-warning">Standby</span></div>
+    </div>
+  </article>
+</section>
+
+<section class="card col-12">
+  <h2>Recent Stories</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Title</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Created</th>
+      </tr>
+      </thead>
+      <tbody>
+      <?php if (empty($recentStories)): ?>
+        <tr>
+          <td colspan="4" class="muted">No stories found. Create your first story to begin newsroom operations.</td>
+        </tr>
+      <?php else: ?>
+        <?php foreach ($recentStories as $story): ?>
+          <tr>
+            <td><?= htmlspecialchars($story['title'] ?? '') ?></td>
+            <td><?= htmlspecialchars($story['category_name'] ?: 'Uncategorized') ?></td>
+            <td>
+              <span class="badge <?= ($story['status'] ?? '') === 'published' ? 'badge-success' : 'badge-warning' ?>">
+                <?= htmlspecialchars(ucfirst($story['status'] ?? 'draft')) ?>
+              </span>
+            </td>
+            <td class="muted"><?= htmlspecialchars($story['created_at'] ?? '-') ?></td>
+          </tr>
+        <?php endforeach; ?>
+      <?php endif; ?>
+      </tbody>
+    </table>
   </div>
-</main>
-</body>
-</html>
+</section>
+
+<?php hs_admin_shell_end(); ?>

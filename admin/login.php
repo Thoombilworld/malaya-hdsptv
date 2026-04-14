@@ -8,22 +8,24 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
+
     if (defined('HS_INSTALLED') && HS_INSTALLED) {
-        $stmt = mysqli_prepare(hs_db(), "SELECT id, password_hash, name FROM hs_users WHERE email = ? AND role = 'admin' LIMIT 1");
+        $stmt = mysqli_prepare(hs_db(), "SELECT id, password_hash, name, role FROM hs_users WHERE email = ? LIMIT 1");
         mysqli_stmt_bind_param($stmt, 's', $email);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
         $user = $res ? mysqli_fetch_assoc($res) : null;
-        if ($user && password_verify($password, $user['password_hash'])) {
+
+        $allowedRoles = ['admin', 'editor', 'reporter'];
+        if ($user && in_array($user['role'], $allowedRoles, true) && password_verify($password, $user['password_hash'])) {
             $_SESSION['hs_admin_id'] = $user['id'];
             $_SESSION['hs_admin_name'] = $user['name'];
             header('Location: ' . hs_base_url('admin/index.php'));
             exit;
-        } else {
-            $error = 'Invalid login details';
         }
+        $error = 'Invalid credentials or insufficient role permissions.';
     } else {
-        $error = 'System not installed yet. Run the installer.';
+        $error = 'System is not installed. Run /install first.';
     }
 }
 ?>
@@ -31,30 +33,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin Login – NEWS HDSPTV</title>
+  <title>Admin Login – HDSPTV</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-  <style>
-    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:radial-gradient(circle at top,#1E3A8A 0,#0B1120 40%,#020617 100%); }
-    .card { background:#0B1120; color:#E5E7EB; padding:24px 26px; border-radius:14px; width:100%; max-width:360px; box-shadow:0 30px 80px rgba(15,23,42,0.8); }
-    h1 { margin-top:0; font-size:22px; }
-    label { font-size:13px; display:block; margin-bottom:4px; }
-    input { width:100%; padding:9px 10px; border-radius:10px; border:1px solid #1F2937; background:#020617; color:#E5E7EB; margin-bottom:10px; font-size:13px; }
-    button { width:100%; padding:9px 10px; border-radius:999px; border:none; background:#FACC15; color:#111827; font-weight:600; font-size:14px; cursor:pointer; }
-    .error { background:#7F1D1D; color:#FECACA; padding:8px 10px; border-radius:8px; font-size:12px; margin-bottom:10px; }
-  </style>
+  <link rel="stylesheet" href="<?= hs_base_url('assets/css/admin.css') ?>">
 </head>
-<body>
-<div class="card">
-  <h1>NEWS HDSPTV Admin</h1>
-  <?php if ($error): ?><div class="error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-  <form method="post">
-    <label for="email">Admin Email</label>
-    <input type="email" name="email" id="email" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <button type="submit">Sign In</button>
-  </form>
+<body class="admin-body">
+<div class="auth-layout">
+  <section class="auth-panel">
+    <div>
+      <h1>HDSPTV Newsroom Control</h1>
+      <p>Enterprise-grade publishing workflow for editors, producers, moderators and live stream operators.</p>
+    </div>
+    <div class="muted" style="color:#CBD5E1;">
+      Secure access · Role-based permissions · Audit-ready actions
+    </div>
+  </section>
+
+  <section class="auth-card-wrap">
+    <div class="auth-card">
+      <h2 style="margin-top:0; margin-bottom:6px;">Sign in to Admin Panel</h2>
+      <p class="muted" style="margin-top:0; margin-bottom:16px;">Use your newsroom credentials.</p>
+
+      <?php if ($error): ?>
+        <div class="error-box"><?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
+
+      <form method="post" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email">
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:8px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:14px; color:#374151;">
+            <input type="checkbox" name="remember" value="1"> Remember me
+          </label>
+          <a href="<?= hs_base_url('auth/forgot.php') ?>" style="font-size:14px; color:#2563EB;">Forgot password?</a>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr auto; gap:10px;">
+          <button class="btn btn-primary" type="submit">Sign In</button>
+          <button class="btn btn-secondary" type="button" onclick="togglePassword()">Show/Hide</button>
+        </div>
+      </form>
+
+      <p class="muted" style="margin-top:16px; margin-bottom:0;">Need help? Contact newsroom support.</p>
+    </div>
+  </section>
 </div>
+<script>
+function togglePassword() {
+  const input = document.getElementById('password');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
 </body>
 </html>
