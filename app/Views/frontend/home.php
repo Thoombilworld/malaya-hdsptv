@@ -34,6 +34,16 @@
   };
 ?>
 
+<div class="top-strip">
+  <div class="container top-strip-inner">
+    <span><?= date('l, F j, Y') ?></span>
+    <span class="divider-dot">•</span>
+    <span>Weather: --°</span>
+    <span class="divider-dot">•</span>
+    <span>Global Edition</span>
+  </div>
+</div>
+
 <header class="site-header sticky-header">
   <div class="container nav-shell">
     <a class="brand" href="<?= hs_base_url('/') ?>">
@@ -56,6 +66,16 @@
     <form class="search-inline" method="get" action="<?= hs_base_url('search.php') ?>">
       <input type="text" name="q" placeholder="Search stories" aria-label="Search stories">
     </form>
+
+    <div class="header-utils">
+      <select aria-label="Language selector" class="lang-selector">
+        <option>EN</option>
+        <option>ML</option>
+        <option>AR</option>
+      </select>
+      <a href="<?= hs_base_url('auth/login.php') ?>">Login</a>
+      <a href="<?= hs_base_url('auth/register.php') ?>">Register</a>
+    </div>
   </div>
 </header>
 
@@ -135,6 +155,12 @@
           <?php endforeach; ?>
         </div>
       </section>
+
+      <section class="live-promo">
+        <h2>Watch HDSPTV Live</h2>
+        <p>Follow live programs, breaking updates, and rolling coverage from our international desk.</p>
+        <a class="btn btn-primary" href="#">Open Live TV</a>
+      </section>
     </section>
 
     <aside class="col-4 col-md-12 stack-24">
@@ -178,6 +204,15 @@
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
+      </section>
+
+      <section class="panel newsletter">
+        <div class="section-head"><h2>Newsletter</h2></div>
+        <p class="meta">Get top headlines and breaking updates delivered daily.</p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Enter your email" aria-label="Email">
+          <button class="btn btn-primary" type="button">Subscribe</button>
+        </form>
       </section>
     </aside>
   </div>
