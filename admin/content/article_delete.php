@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
 hs_require_admin();
+hs_require_permission('article.edit');
 $db = hs_db();
 $id = (int)($_GET['id'] ?? 0);
 if ($id > 0) {

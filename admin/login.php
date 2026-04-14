@@ -9,7 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (defined('HS_INSTALLED') && HS_INSTALLED) {
+    if (hs_auth_is_locked($email)) {
+        $error = 'Too many failed attempts. Please wait 15 minutes and try again.';
+    } elseif (defined('HS_INSTALLED') && HS_INSTALLED) {
         $stmt = mysqli_prepare(hs_db(), "SELECT id, password_hash, name, role FROM hs_users WHERE email = ? LIMIT 1");
         mysqli_stmt_bind_param($stmt, 's', $email);
         mysqli_stmt_execute($stmt);
@@ -18,11 +20,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $allowedRoles = ['admin', 'editor', 'reporter'];
         if ($user && in_array($user['role'], $allowedRoles, true) && password_verify($password, $user['password_hash'])) {
+            session_regenerate_id(true);
+            hs_auth_clear_attempts($email);
             $_SESSION['hs_admin_id'] = $user['id'];
             $_SESSION['hs_admin_name'] = $user['name'];
-            header('Location: ' . hs_base_url('admin/index.php'));
+            $_SESSION['hs_admin_role'] = $user['role'];
+
+            if ($user['role'] === 'reporter') {
+                header('Location: ' . hs_base_url('admin/content/article_add.php'));
+            } else {
+                header('Location: ' . hs_base_url('admin/index.php'));
+            }
             exit;
         }
+        hs_auth_record_failure($email);
         $error = 'Invalid credentials or insufficient role permissions.';
     } else {
         $error = 'System is not installed. Run /install first.';
@@ -44,9 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h1>HDSPTV Newsroom Control</h1>
       <p>Enterprise-grade publishing workflow for editors, producers, moderators and live stream operators.</p>
     </div>
-    <div class="muted" style="color:#CBD5E1;">
-      Secure access · Role-based permissions · Audit-ready actions
-    </div>
+    <div class="muted" style="color:#CBD5E1;">Secure access · Role-based permissions · Audit-ready actions</div>
   </section>
 
   <section class="auth-card-wrap">

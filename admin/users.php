@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../bootstrap.php';
 hs_require_admin();
+hs_require_permission('user.manage');
 $db = hs_db();
 $res = mysqli_query($db, "SELECT id, name, email, role, created_at FROM hs_users ORDER BY created_at DESC");
 $staff = $res ? mysqli_fetch_all($res, MYSQLI_ASSOC) : [];

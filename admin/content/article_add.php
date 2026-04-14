@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
 hs_require_admin();
+hs_require_permission('article.create');
 $db = hs_db();
 
 // categories for select

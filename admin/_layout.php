@@ -1,17 +1,25 @@
 <?php
 
 function hs_admin_nav_items(): array {
-    return [
-        'dashboard' => ['label' => 'Dashboard', 'href' => hs_base_url('admin/index.php')],
-        'content' => ['label' => 'All News', 'href' => hs_base_url('admin/content/index.php')],
-        'homepage' => ['label' => 'Homepage', 'href' => hs_base_url('admin/homepage.php')],
-        'seo' => ['label' => 'SEO', 'href' => hs_base_url('admin/seo.php')],
-        'social' => ['label' => 'Social', 'href' => hs_base_url('admin/social.php')],
-        'ads' => ['label' => 'Ads', 'href' => hs_base_url('admin/ads.php')],
-        'staff' => ['label' => 'Users & Roles', 'href' => hs_base_url('admin/users.php')],
-        'logs' => ['label' => 'Audit Logs', 'href' => hs_base_url('admin/logs.php')],
-        'logout' => ['label' => 'Logout', 'href' => hs_base_url('admin/logout.php')],
+    $all = [
+        'dashboard' => ['label' => 'Dashboard', 'href' => hs_base_url('admin/index.php'), 'permission' => 'dashboard.view'],
+        'content' => ['label' => 'All News', 'href' => hs_base_url('admin/content/index.php'), 'permission' => 'article.create'],
+        'homepage' => ['label' => 'Homepage', 'href' => hs_base_url('admin/homepage.php'), 'permission' => 'article.publish'],
+        'seo' => ['label' => 'SEO', 'href' => hs_base_url('admin/seo.php'), 'permission' => 'seo.manage'],
+        'social' => ['label' => 'Social', 'href' => hs_base_url('admin/social.php'), 'permission' => 'seo.manage'],
+        'ads' => ['label' => 'Ads', 'href' => hs_base_url('admin/ads.php'), 'permission' => 'ads.manage'],
+        'staff' => ['label' => 'Users & Roles', 'href' => hs_base_url('admin/users.php'), 'permission' => 'user.manage'],
+        'logs' => ['label' => 'Audit Logs', 'href' => hs_base_url('admin/logs.php'), 'permission' => 'settings.manage'],
+        'logout' => ['label' => 'Logout', 'href' => hs_base_url('admin/logout.php'), 'permission' => null],
     ];
+
+    $items = [];
+    foreach ($all as $key => $item) {
+        if ($item['permission'] === null || hs_can($item['permission'])) {
+            $items[$key] = $item;
+        }
+    }
+    return $items;
 }
 
 function hs_admin_shell_start(string $title, string $pageTitle, string $active = 'dashboard'): void {

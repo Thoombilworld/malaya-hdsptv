@@ -79,6 +79,71 @@ function hs_latest_posts($limit = 8) {
     return $rows;
 }
 
+
+
+function hs_role_permissions() {
+    return [
+        'admin' => ['dashboard.view','article.create','article.edit','article.publish','category.manage','tag.manage','user.manage','settings.manage','ads.manage','seo.manage'],
+        'editor' => ['dashboard.view','article.create','article.edit','article.publish','category.manage','tag.manage','seo.manage'],
+        'reporter' => ['dashboard.view','article.create','article.edit.own'],
+    ];
+}
+
+function hs_admin_role() {
+    return $_SESSION['hs_admin_role'] ?? 'reporter';
+}
+
+function hs_can($permission) {
+    if (!hs_is_admin_logged_in()) {
+        return false;
+    }
+    $role = hs_admin_role();
+    $map = hs_role_permissions();
+    $perms = $map[$role] ?? [];
+    return in_array($permission, $perms, true);
+}
+
+function hs_require_permission($permission) {
+    if (!hs_can($permission)) {
+        http_response_code(403);
+        echo 'Permission denied';
+        exit;
+    }
+}
+
+function hs_auth_attempt_key($email) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    return strtolower(trim($email)) . '|' . $ip;
+}
+
+function hs_auth_is_locked($email, $maxAttempts = 5, $lockSeconds = 900) {
+    $key = hs_auth_attempt_key($email);
+    $pool = $_SESSION['hs_auth_attempts'] ?? [];
+    if (empty($pool[$key])) {
+        return false;
+    }
+    $entry = $pool[$key];
+    if (($entry['count'] ?? 0) < $maxAttempts) {
+        return false;
+    }
+    $last = (int)($entry['last'] ?? 0);
+    return (time() - $last) < $lockSeconds;
+}
+
+function hs_auth_record_failure($email) {
+    $key = hs_auth_attempt_key($email);
+    if (empty($_SESSION['hs_auth_attempts'][$key])) {
+        $_SESSION['hs_auth_attempts'][$key] = ['count' => 0, 'last' => time()];
+    }
+    $_SESSION['hs_auth_attempts'][$key]['count']++;
+    $_SESSION['hs_auth_attempts'][$key]['last'] = time();
+}
+
+function hs_auth_clear_attempts($email) {
+    $key = hs_auth_attempt_key($email);
+    unset($_SESSION['hs_auth_attempts'][$key]);
+}
+
 function hs_top_categories($limit = 5) {
     if (!defined('HS_INSTALLED') || !HS_INSTALLED) {
         return [];
