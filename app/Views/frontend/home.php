@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
+  <script defer src="<?= hs_base_url('assets/js/localized-datetime.js') ?>"></script>
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -64,11 +65,25 @@
 
 <div class="top-strip">
   <div class="container top-strip-inner">
-    <span><?= date('l, F j, Y') ?></span>
+    <span data-localized-datetime><?= date('l, F j, Y · g:i A') ?></span>
     <span class="divider-dot">•</span>
     <span><?= htmlspecialchars(hs_t('global_edition')) ?></span>
     <span class="divider-dot">•</span>
     <span><?= htmlspecialchars(hs_t('live_desk_active')) ?></span>
+    <span class="divider-dot">•</span>
+    <label class="sr-only" for="datetime-timezone">Timezone</label>
+    <select id="datetime-timezone" class="datetime-select" data-timezone-override>
+      <option value="auto">Timezone: Auto</option>
+    </select>
+    <label class="sr-only" for="datetime-locale">Format locale</label>
+    <select id="datetime-locale" class="datetime-select" data-locale-override>
+      <option value="auto">Format: Auto</option>
+      <option value="en-US">English (US)</option>
+      <option value="en-GB">English (UK)</option>
+      <option value="ml-IN">Malayalam</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="ar-AE">Arabic</option>
+    </select>
   </div>
 </div>
 

@@ -44,8 +44,18 @@ a:hover { color: var(--red); }
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   color: #374151;
   font-size: 12px;
+}
+.datetime-select {
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: #fff;
+  font-size: 12px;
+  color: #374151;
 }
 .divider-dot { color: #9CA3AF; }
 
@@ -218,7 +228,8 @@ a:hover { color: var(--red); }
 
 @media (max-width: 760px) {
   .container { width: min(100%, calc(100% - 32px)); }
-  .top-strip { display: none; }
+  .top-strip { display: block; }
+  .top-strip-inner { min-height: 44px; }
   .nav-shell { flex-wrap: wrap; gap: var(--space-2); padding: 10px 0; }
   .brand { min-width: 0; }
   .mobile-menu-btn { display: inline-flex; margin-left: auto; }

@@ -179,6 +179,7 @@ if (!empty($post['image_main'])) {
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
+  <script defer src="<?= hs_base_url('assets/js/localized-datetime.js') ?>"></script>
   <script defer src="<?= hs_base_url('assets/js/social-share.js') ?>"></script>
 
   <style>
@@ -539,7 +540,7 @@ if (!empty($post['image_main'])) {
         </div>
         <h1 class="article-title"><?= htmlspecialchars($post['title']) ?></h1>
         <div class="article-meta">
-          <?= hs_post_date_local($post) ?>
+          <span data-localized-datetime data-timestamp="<?= htmlspecialchars((string)($post['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?= hs_post_date_local($post) ?></span>
           <?php if (!empty($post['author_name'])): ?>
             · By <?= htmlspecialchars($post['author_name']) ?>
           <?php endif; ?>
