@@ -61,22 +61,22 @@ $canonical = hs_category_url($category['slug']);
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
   <style>
     :root {
-      --hs-primary: #1E3A8A;
-      --hs-primary-dark: #0B1120;
-      --hs-accent: #FACC15;
-      --hs-bg: #F6F7FB;
-      --hs-card: #FFFFFF;
-      --hs-border-soft: #E5E7EB;
-      --hs-text-main: #111827;
-      --hs-text-muted: #6B7280;
+      --primary: #D60000;
+      --dark: #111111;
+      --navy: #0B1220;
+      --bg: #F6F7FB;
+      --card: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #111111;
+      --text-muted: #6B7280;
     }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--hs-bg);
+      background: var(--bg);
       color: #111827;
     }
-    a { color: #1D4ED8; text-decoration: none; }
+    a { color: var(--primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     header {
@@ -95,7 +95,7 @@ $canonical = hs_category_url($category['slug']);
     .top-left { display:flex; align-items:center; gap:10px; }
     .logo-mark {
       width:32px; height:32px; border-radius:14px;
-      background: #0B1220;
+      background: var(--navy);
       display:flex; align-items:center; justify-content:center;
       font-weight:800; font-size:16px; color:#FFFFFF;
       box-shadow:0 10px 25px rgba(15,23,42,0.6);
@@ -109,7 +109,7 @@ $canonical = hs_category_url($category['slug']);
       font-size:12px; text-transform:uppercase; letter-spacing:.12em;
     }
     .nav-main a { color:#374151; padding:4px 8px; border-radius:999px; }
-    .nav-main a:hover { background:#F3F4F6; color:#1E3A8A; text-decoration:none; }
+    .nav-main a:hover { background:#F3F4F6; color:var(--primary); text-decoration:none; }
 
     .nav-search {
       margin-left:auto;
@@ -162,9 +162,9 @@ $canonical = hs_category_url($category['slug']);
       margin-top:16px;
     }
     .news-card {
-      background:#F9FAFB;
+      background:var(--card);
       border-radius:16px;
-      box-shadow:0 16px 36px rgba(15,23,42,0.6);
+      box-shadow:0 10px 24px rgba(11,18,32,0.12);
       color:#111827;
       overflow:hidden;
       display:flex;
@@ -199,7 +199,7 @@ $canonical = hs_category_url($category['slug']);
       color:#111827;
     }
     .news-title a { color:#111827; }
-    .news-title a:hover { color:#1D4ED8; text-decoration:none; }
+    .news-title a:hover { color:var(--primary); text-decoration:none; }
     .news-meta {
       font-size:11px;
       color:#6B7280;

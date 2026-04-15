@@ -184,22 +184,22 @@ if (!empty($post['image_main'])) {
 
   <style>
     :root {
-      --hs-primary: #1E3A8A;
-      --hs-primary-dark: #0B1120;
-      --hs-accent: #FACC15;
-      --hs-bg: #F6F7FB;
-      --hs-card: #FFFFFF;
-      --hs-border-soft: #E5E7EB;
-      --hs-text-main: #111827;
-      --hs-text-muted: #6B7280;
+      --primary: #D60000;
+      --dark: #111111;
+      --navy: #0B1220;
+      --bg: #F6F7FB;
+      --card: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #111111;
+      --text-muted: #6B7280;
     }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--hs-bg);
+      background: var(--bg);
       color: #111827;
     }
-    a { color: var(--hs-primary); text-decoration: none; }
+    a { color: var(--primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     header {
@@ -221,7 +221,7 @@ if (!empty($post['image_main'])) {
       background: #0B1220;
       display:flex; align-items:center; justify-content:center;
       font-weight:800; font-size:16px; color:#FFFFFF;
-      box-shadow:0 10px 25px rgba(15,23,42,0.6);
+      box-shadow:0 10px 24px rgba(11,18,32,0.12);
     }
     .logo-text { display:flex; flex-direction:column; }
     .logo-text-main { font-weight:800; letter-spacing:.18em; font-size:13px; }
@@ -232,7 +232,7 @@ if (!empty($post['image_main'])) {
       font-size:12px; text-transform:uppercase; letter-spacing:.12em;
     }
     .nav-main a { color:#374151; padding:4px 8px; border-radius:999px; }
-    .nav-main a:hover { background:#F3F4F6; color:#1E3A8A; text-decoration:none; }
+    .nav-main a:hover { background:#F3F4F6; color:var(--primary); text-decoration:none; }
 
     .nav-search {
       margin-left:auto;
@@ -254,7 +254,7 @@ if (!empty($post['image_main'])) {
     .nav-search button { display:none; }
 
     .user-bar { font-size:11px; color:#374151; text-align:right; }
-    .user-bar a { color:#1E3A8A; }
+    .user-bar a { color:var(--primary); }
 
     .page {
       width:100%;
@@ -272,10 +272,10 @@ if (!empty($post['image_main'])) {
     }
 
     .article-card {
-      background:#F9FAFB;
+      background:var(--card);
       border-radius:18px;
-      box-shadow:0 20px 45px rgba(15,23,42,0.6);
-      color:var(--hs-text-main);
+      box-shadow:0 12px 28px rgba(11,18,32,0.14);
+      color:var(--text);
       overflow:hidden;
     }
     .article-hero-image {
@@ -300,13 +300,13 @@ if (!empty($post['image_main'])) {
       margin-bottom:6px;
     }
     .breadcrumb a { color:#6B7280; }
-    .breadcrumb a:hover { color:#1E3A8A; text-decoration:none; }
+    .breadcrumb a:hover { color:var(--primary); text-decoration:none; }
 
     .article-kicker {
       font-size:11px;
       text-transform:uppercase;
       letter-spacing:.18em;
-      color:var(--hs-primary);
+      color:var(--primary);
       margin-bottom:6px;
     }
     .article-title {
@@ -318,7 +318,7 @@ if (!empty($post['image_main'])) {
     }
     .article-meta {
       font-size:12px;
-      color:var(--hs-text-muted);
+      color:var(--text-muted);
       margin-bottom:12px;
     }
 
@@ -331,7 +331,7 @@ if (!empty($post['image_main'])) {
       padding:3px 8px;
       border-radius:999px;
       background:#EFF6FF;
-      color:#1D4ED8;
+      color:var(--primary);
       margin:0 4px 4px 0;
       font-size:11px;
     }
@@ -340,7 +340,7 @@ if (!empty($post['image_main'])) {
       margin-top:14px;
       font-size:15px;
       line-height:1.7;
-      color:var(--hs-text-main);
+      color:var(--text);
     }
     .article-body p { margin:0 0 1em; }
     .article-body h2,
@@ -361,9 +361,9 @@ if (!empty($post['image_main'])) {
     .share-block {
       margin-top:20px;
       padding-top:12px;
-      border-top:1px solid var(--hs-border-soft);
+      border-top:1px solid var(--border);
       font-size:12px;
-      color:var(--hs-text-muted);
+      color:var(--text-muted);
     }
     .share-links {
       display:flex;
@@ -397,7 +397,7 @@ if (!empty($post['image_main'])) {
     .related-block {
       margin-top:18px;
       padding-top:14px;
-      border-top:1px solid var(--hs-border-soft);
+      border-top:1px solid var(--border);
     }
     .related-title {
       font-size:13px;
@@ -434,7 +434,7 @@ if (!empty($post['image_main'])) {
       text-transform:uppercase;
       letter-spacing:.16em;
       margin-bottom:8px;
-      color:#1E3A8A;
+      color:var(--primary);
     }
 
     .sidebar-list {
@@ -447,7 +447,7 @@ if (!empty($post['image_main'])) {
       margin-bottom:6px;
     }
     .sidebar-list a { color:#374151; }
-    .sidebar-list a:hover { color:#1E3A8A; text-decoration:none; }
+    .sidebar-list a:hover { color:var(--primary); text-decoration:none; }
 
     footer {
       border-top:1px solid #E5E7EB;
@@ -650,7 +650,7 @@ if (!empty($post['image_main'])) {
       <section class="sidebar-card">
         <div class="sidebar-title">Homepage</div>
         <p style="font-size:12px;color:#374151;">
-          <a href="<?= hs_base_url('index.php') ?>" style="color:#1E3A8A;">← Back to homepage</a>
+          <a href="<?= hs_base_url('index.php') ?>" style="color:var(--primary);">← Back to homepage</a>
         </p>
       </section>
     </aside>

@@ -1,6 +1,18 @@
 @import url('material-ui.css');
 
 :root {
+  --primary: #D60000;
+  --dark: #111111;
+  --navy: #0B1220;
+  --bg: #F6F7FB;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+  --text: #111111;
+  --text-muted: #6B7280;
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --error: #DC2626;
+
   --frame-desktop: 1440px;
   --content-max: 1280px;
   --radius: 16px;
@@ -11,15 +23,8 @@
   --space-4: 32px;
   --space-5: 40px;
   --space-6: 48px;
-  --red: #D60000;
-  --dark: #111111;
-  --navy: #0B1220;
-  --bg: #F6F7FB;
-  --card: #FFFFFF;
-  --border: #E5E7EB;
-  --gray: #6B7280;
-  --success: #16A34A;
-  --warning: #F59E0B;
+  --red: var(--primary);
+  --gray: var(--text-muted);
   --info: #2563EB;
 }
 
@@ -27,7 +32,7 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  color: var(--dark);
+  color: var(--text);
   background: var(--bg);
   line-height: 1.5;
 }
