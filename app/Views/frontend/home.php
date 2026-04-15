@@ -13,6 +13,7 @@
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
   <script defer src="<?= hs_base_url('assets/js/localized-datetime.js') ?>"></script>
+  <script defer src="<?= hs_base_url('assets/js/pwa-notifications.js') ?>"></script>
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -113,6 +114,7 @@
 
     <div class="header-utils">
       <button class="install-app-btn" data-install-app hidden><?= htmlspecialchars(hs_t('install_app')) ?></button>
+      <button class="install-app-btn" data-enable-notifications hidden>Enable Alerts</button>
       <form method="get" class="lang-form" action="<?= hs_base_url('/') ?>">
         <label class="sr-only" for="language-picker">Language</label>
         <select id="language-picker" name="lang" aria-label="Language selector" class="lang-selector" onchange="this.form.submit()">

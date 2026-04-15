@@ -1,3 +1,5 @@
+@import url('material-ui.css');
+
 :root {
   --frame-desktop: 1440px;
   --content-max: 1280px;

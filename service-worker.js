@@ -1,10 +1,15 @@
-const CACHE_NAME = 'hdsptv-v1';
-const OFFLINE_URL = '/';
+const CACHE_NAME = 'hdsptv-v2';
+const OFFLINE_URL = '/offline.html';
 const STATIC_ASSETS = [
   '/',
+  '/offline.html',
   '/manifest.webmanifest',
   '/assets/css/style.css',
+  '/assets/css/material-ui.css',
   '/assets/js/pwa.js',
+  '/assets/js/pwa-notifications.js',
+  '/assets/js/localized-datetime.js',
+  '/assets/js/social-share.js',
   '/assets/images/icons/icon-192.svg',
   '/assets/images/icons/icon-512.svg'
 ];
@@ -40,6 +45,42 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => caches.match(OFFLINE_URL));
+    })
+  );
+});
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'HDSPTV Alert', body: event.data ? event.data.text() : 'Breaking update available.' };
+  }
+
+  const title = data.title || 'HDSPTV Alert';
+  const options = {
+    body: data.body || 'Tap to open the latest news updates.',
+    icon: '/assets/images/icons/icon-192.svg',
+    badge: '/assets/images/icons/icon-192.svg',
+    data: { url: data.url || '/' }
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+      return null;
     })
   );
 });

@@ -1,3 +1,5 @@
+@import url('material-ui.css');
+
 :root {
   --admin-max: 1280px;
   --sidebar-w: 272px;
