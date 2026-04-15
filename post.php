@@ -187,7 +187,7 @@ if (!empty($post['image_main'])) {
       --hs-primary: #1E3A8A;
       --hs-primary-dark: #0B1120;
       --hs-accent: #FACC15;
-      --hs-bg: #020617;
+      --hs-bg: #F6F7FB;
       --hs-card: #FFFFFF;
       --hs-border-soft: #E5E7EB;
       --hs-text-main: #111827;
@@ -196,8 +196,8 @@ if (!empty($post['image_main'])) {
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top, #1E3A8A 0, #020617 45%, #020617 100%);
-      color: #F9FAFB;
+      background: var(--hs-bg);
+      color: #111827;
     }
     a { color: var(--hs-primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -207,8 +207,8 @@ if (!empty($post['image_main'])) {
       top: 0;
       z-index: 40;
       backdrop-filter: blur(18px);
-      background: linear-gradient(90deg, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
-      border-bottom: 1px solid rgba(15,23,42,0.9);
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #E5E7EB;
       padding: 8px 18px;
       display:flex;
       align-items:center;
@@ -218,21 +218,21 @@ if (!empty($post['image_main'])) {
     .top-left { display:flex; align-items:center; gap:10px; }
     .logo-mark {
       width:32px; height:32px; border-radius:14px;
-      background: radial-gradient(circle at 20% 0, #FACC15 0, #1E3A8A 45%, #020617 100%);
+      background: #0B1220;
       display:flex; align-items:center; justify-content:center;
-      font-weight:800; font-size:16px; color:#F9FAFB;
+      font-weight:800; font-size:16px; color:#FFFFFF;
       box-shadow:0 10px 25px rgba(15,23,42,0.6);
     }
     .logo-text { display:flex; flex-direction:column; }
     .logo-text-main { font-weight:800; letter-spacing:.18em; font-size:13px; }
-    .logo-text-tag { font-size:11px; color:#E5E7EB; opacity:.85; }
+    .logo-text-tag { font-size:11px; color:#6B7280; opacity:.9; }
 
     .nav-main {
       display:flex; align-items:center; gap:12px;
       font-size:12px; text-transform:uppercase; letter-spacing:.12em;
     }
-    .nav-main a { color:#E5E7EB; padding:4px 6px; border-radius:999px; }
-    .nav-main a:hover { background:rgba(15,23,42,0.8); color:#FACC15; text-decoration:none; }
+    .nav-main a { color:#374151; padding:4px 8px; border-radius:999px; }
+    .nav-main a:hover { background:#F3F4F6; color:#1E3A8A; text-decoration:none; }
 
     .nav-search {
       margin-left:auto;
@@ -249,12 +249,12 @@ if (!empty($post['image_main'])) {
       min-width:200px;
     }
     .nav-search input[type="text"]::placeholder {
-      color:#9CA3AF;
+      color:#6B7280;
     }
     .nav-search button { display:none; }
 
-    .user-bar { font-size:11px; color:#E5E7EB; text-align:right; }
-    .user-bar a { color:#FACC15; }
+    .user-bar { font-size:11px; color:#374151; text-align:right; }
+    .user-bar a { color:#1E3A8A; }
 
     .page {
       width:100%;
@@ -296,11 +296,11 @@ if (!empty($post['image_main'])) {
     }
     .breadcrumb {
       font-size:11px;
-      color:#9CA3AF;
+      color:#6B7280;
       margin-bottom:6px;
     }
-    .breadcrumb a { color:#9CA3AF; }
-    .breadcrumb a:hover { color:#FACC15; text-decoration:none; }
+    .breadcrumb a { color:#6B7280; }
+    .breadcrumb a:hover { color:#1E3A8A; text-decoration:none; }
 
     .article-kicker {
       font-size:11px;
@@ -422,19 +422,19 @@ if (!empty($post['image_main'])) {
       gap:14px;
     }
     .sidebar-card {
-      background:rgba(15,23,42,0.96);
+      background:#FFFFFF;
       border-radius:16px;
-      border:1px solid rgba(15,23,42,0.9);
+      border:1px solid #E5E7EB;
       padding:14px 14px 16px;
-      color:#E5E7EB;
-      box-shadow:0 16px 40px rgba(15,23,42,0.8);
+      color:#374151;
+      box-shadow:0 12px 28px rgba(15,23,42,0.12);
     }
     .sidebar-title {
       font-size:13px;
       text-transform:uppercase;
       letter-spacing:.16em;
       margin-bottom:8px;
-      color:#FACC15;
+      color:#1E3A8A;
     }
 
     .sidebar-list {
@@ -446,16 +446,16 @@ if (!empty($post['image_main'])) {
     .sidebar-list li {
       margin-bottom:6px;
     }
-    .sidebar-list a { color:#E5E7EB; }
-    .sidebar-list a:hover { color:#FACC15; text-decoration:none; }
+    .sidebar-list a { color:#374151; }
+    .sidebar-list a:hover { color:#1E3A8A; text-decoration:none; }
 
     footer {
-      border-top:1px solid rgba(31,41,55,0.9);
+      border-top:1px solid #E5E7EB;
       padding:10px 18px 16px;
       font-size:11px;
-      color:#9CA3AF;
+      color:#6B7280;
       text-align:center;
-      background:linear-gradient(180deg, rgba(15,23,42,0.98), #020617);
+      background:#FFFFFF;
     }
 
     @media (max-width:960px) {
@@ -573,7 +573,7 @@ if (!empty($post['image_main'])) {
 
         <?php if (!empty($galleryItems)): ?>
           <div class="article-gallery" style="margin-top:16px;">
-            <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#9CA3AF; margin-bottom:6px;">
+            <div style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#6B7280; margin-bottom:6px;">
               Photo Gallery
             </div>
             <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;">
@@ -621,7 +621,7 @@ if (!empty($post['image_main'])) {
               <?php foreach ($related as $r): ?>
                 <li>
                   <a href="<?= hs_post_url($r['slug']) ?>"><?= htmlspecialchars($r['title']) ?></a>
-                  <span style="font-size:11px;color:#9CA3AF;"> · <?= hs_post_date_local($r) ?></span>
+                  <span style="font-size:11px;color:#6B7280;"> · <?= hs_post_date_local($r) ?></span>
                 </li>
               <?php endforeach; ?>
             </ul>
@@ -634,13 +634,13 @@ if (!empty($post['image_main'])) {
       <section class="sidebar-card">
         <div class="sidebar-title">Trending</div>
         <?php if (empty($trending)): ?>
-          <p style="font-size:12px;color:#9CA3AF;">No trending posts.</p>
+          <p style="font-size:12px;color:#6B7280;">No trending posts.</p>
         <?php else: ?>
           <ul class="sidebar-list">
             <?php foreach ($trending as $t): ?>
               <li>
                 <a href="<?= hs_post_url($t['slug']) ?>"><?= htmlspecialchars($t['title']) ?></a>
-                <div style="font-size:11px;color:#9CA3AF;"><?= hs_post_date_local($t) ?></div>
+                <div style="font-size:11px;color:#6B7280;"><?= hs_post_date_local($t) ?></div>
               </li>
             <?php endforeach; ?>
           </ul>
@@ -649,8 +649,8 @@ if (!empty($post['image_main'])) {
 
       <section class="sidebar-card">
         <div class="sidebar-title">Homepage</div>
-        <p style="font-size:12px;color:#E5E7EB;">
-          <a href="<?= hs_base_url('index.php') ?>" style="color:#FACC15;">← Back to homepage</a>
+        <p style="font-size:12px;color:#374151;">
+          <a href="<?= hs_base_url('index.php') ?>" style="color:#1E3A8A;">← Back to homepage</a>
         </p>
       </section>
     </aside>
