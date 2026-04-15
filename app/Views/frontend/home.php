@@ -19,8 +19,16 @@
   $lead = $safeFeatured[0] ?? ($safePosts[0] ?? null);
   $secondary = array_slice($safeFeatured ?: $safePosts, 1, 4);
   $latest = array_slice($safePosts, 0, 9);
-  $editorsPicks = array_slice($safePosts, 9, 4);
-  $mostViewed = array_slice($safeTrending ?: $safePosts, 0, 5);
+  $editorsPicks = array_slice($safePosts, 9, 5);
+  $mostViewed = array_slice($safeTrending ?: $safePosts, 0, 6);
+
+  $grouped = [];
+  foreach ($safePosts as $row) {
+      $key = $row['category_name'] ?? 'News';
+      if (!isset($grouped[$key])) $grouped[$key] = [];
+      $grouped[$key][] = $row;
+  }
+  $topCategories = array_slice(array_keys($grouped), 0, 3);
 
   $formatDate = static function(array $row): string {
       $date = $row['created_at'] ?? null;
@@ -38,9 +46,9 @@
   <div class="container top-strip-inner">
     <span><?= date('l, F j, Y') ?></span>
     <span class="divider-dot">•</span>
-    <span>Weather: --°</span>
-    <span class="divider-dot">•</span>
     <span>Global Edition</span>
+    <span class="divider-dot">•</span>
+    <span>Live Desk Active</span>
   </div>
 </div>
 
@@ -68,57 +76,46 @@
     </form>
 
     <div class="header-utils">
-      <select aria-label="Language selector" class="lang-selector">
-        <option>EN</option>
-        <option>ML</option>
-        <option>AR</option>
-      </select>
+      <select aria-label="Language selector" class="lang-selector"><option>EN</option><option>ML</option><option>AR</option></select>
       <a href="<?= hs_base_url('auth/login.php') ?>">Login</a>
       <a href="<?= hs_base_url('auth/register.php') ?>">Register</a>
     </div>
   </div>
 </header>
 
-<div class="breaking-strip">
-  <div class="container breaking-inner">
+<section class="breaking-strip">
+  <div class="container breaking-inner ticker-track">
     <span class="badge badge-breaking">Breaking</span>
     <?php if (empty($safeBreaking)): ?>
       <span class="meta">No active breaking headlines.</span>
     <?php else: ?>
-      <?php foreach (array_slice($safeBreaking, 0, 5) as $b): ?>
+      <?php foreach (array_slice($safeBreaking, 0, 8) as $b): ?>
         <span class="breaking-item"><?= htmlspecialchars($b['title'] ?? '') ?></span>
       <?php endforeach; ?>
     <?php endif; ?>
   </div>
-</div>
+</section>
 
 <main class="page-bg">
   <div class="container grid-12 main-home">
     <section class="col-8 col-md-12 stack-32">
       <section class="hero-card">
-        <?php if ($lead): ?>
-          <?php if (!empty($lead['image_main'])): ?>
-            <img class="hero-media" src="<?= hs_base_url($lead['image_main']) ?>" alt="<?= htmlspecialchars($lead['title']) ?>">
-          <?php endif; ?>
-          <div class="hero-content">
-            <span class="badge"><?= htmlspecialchars($lead['category_name'] ?? 'Top Story') ?></span>
-            <h1><?= htmlspecialchars($lead['title']) ?></h1>
-            <p><?= htmlspecialchars($lead['excerpt'] ?? ($settings['tagline'] ?? 'Trusted global coverage from HDSPTV newsroom.')) ?></p>
+        <?php if ($lead && !empty($lead['image_main'])): ?>
+          <img class="hero-media" src="<?= hs_base_url($lead['image_main']) ?>" alt="<?= htmlspecialchars($lead['title']) ?>">
+        <?php endif; ?>
+        <div class="hero-content">
+          <span class="badge"><?= htmlspecialchars($lead['category_name'] ?? 'Top Story') ?></span>
+          <h1><?= htmlspecialchars($lead['title'] ?? 'Welcome to HDSPTV') ?></h1>
+          <p><?= htmlspecialchars($lead['excerpt'] ?? ($settings['tagline'] ?? 'Trusted global coverage from HDSPTV newsroom.')) ?></p>
+          <?php if ($lead): ?>
             <div class="meta"><?= $formatDate($lead) ?></div>
             <a class="btn btn-primary" href="<?= $articleLink($lead) ?>">Read full story</a>
-          </div>
-        <?php else: ?>
-          <div class="hero-content">
-            <h1>Welcome to HDSPTV</h1>
-            <p>Publish your first story to start building your editorial front page.</p>
-          </div>
-        <?php endif; ?>
+          <?php endif; ?>
+        </div>
       </section>
 
       <section>
-        <div class="section-head">
-          <h2>Top Stories</h2>
-        </div>
+        <div class="section-head"><h2>Featured Stories</h2></div>
         <div class="card-grid card-grid-2">
           <?php foreach ($secondary as $item): ?>
             <article class="news-card">
@@ -144,13 +141,16 @@
       </section>
 
       <section>
-        <div class="section-head"><h2>Video News</h2></div>
-        <div class="card-grid card-grid-2">
-          <?php foreach (array_slice($safeVideos, 0, 4) as $item): ?>
-            <article class="news-card">
-              <span class="badge badge-info">Video</span>
-              <h3><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></h3>
-              <div class="meta"><?= $formatDate($item) ?></div>
+        <div class="section-head"><h2>Category Blocks</h2></div>
+        <div class="card-grid card-grid-3">
+          <?php foreach ($topCategories as $cat): ?>
+            <article class="panel">
+              <h3><?= htmlspecialchars($cat) ?></h3>
+              <ul class="list-clean">
+                <?php foreach (array_slice($grouped[$cat], 0, 3) as $row): ?>
+                  <li><a href="<?= $articleLink($row) ?>"><?= htmlspecialchars($row['title']) ?></a></li>
+                <?php endforeach; ?>
+              </ul>
             </article>
           <?php endforeach; ?>
         </div>
@@ -168,10 +168,7 @@
         <div class="section-head"><h2>Trending Now</h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeTrending, 0, 6) as $item): ?>
-            <li>
-              <a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a>
-              <div class="meta"><?= $formatDate($item) ?></div>
-            </li>
+            <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a><div class="meta"><?= $formatDate($item) ?></div></li>
           <?php endforeach; ?>
         </ul>
       </section>
@@ -180,27 +177,15 @@
         <div class="section-head"><h2>Most Viewed</h2></div>
         <ul class="list-clean">
           <?php foreach ($mostViewed as $item): ?>
-            <li>
-              <a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a>
-              <div class="meta"><?= htmlspecialchars($item['category_name'] ?? 'News') ?></div>
-            </li>
-          <?php endforeach; ?>
-        </ul>
-      </section>
-
-      <section class="panel">
-        <div class="section-head"><h2>Editor’s Picks</h2></div>
-        <ul class="list-clean">
-          <?php foreach ($editorsPicks as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
       </section>
 
       <section class="panel">
-        <div class="section-head"><h2>Photo Gallery</h2></div>
+        <div class="section-head"><h2>Video News</h2></div>
         <ul class="list-clean">
-          <?php foreach (array_slice($safeGallery, 0, 4) as $item): ?>
+          <?php foreach (array_slice($safeVideos, 0, 4) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></li>
           <?php endforeach; ?>
         </ul>
@@ -209,9 +194,9 @@
       <section class="panel newsletter">
         <div class="section-head"><h2>Newsletter</h2></div>
         <p class="meta">Get top headlines and breaking updates delivered daily.</p>
-        <form class="newsletter-form">
+        <form class="newsletter-form" method="post" action="#">
           <input type="email" placeholder="Enter your email" aria-label="Email">
-          <button class="btn btn-primary" type="button">Subscribe</button>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
         </form>
       </section>
     </aside>
@@ -224,11 +209,7 @@
       <strong><?= htmlspecialchars($settings['site_title'] ?? 'HDSPTV') ?></strong>
       <p class="meta"><?= htmlspecialchars($settings['tagline'] ?? 'International newsroom coverage across India, GCC, Kerala and beyond.') ?></p>
     </div>
-    <div class="footer-links">
-      <a href="#">About</a>
-      <a href="#">Contact</a>
-      <a href="#">Privacy</a>
-    </div>
+    <div class="footer-links"><a href="#">About</a><a href="#">Contact</a><a href="#">Privacy</a></div>
   </div>
 </footer>
 </body>
