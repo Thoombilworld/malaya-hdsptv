@@ -1,5 +1,6 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
+require __DIR__ . '/../../app/Modules/Admin/module.php';
 hs_require_admin();
 hs_require_permission('tag.manage');
 $db = hs_db();
@@ -50,7 +51,7 @@ if ($has_tags) {
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
 </head>
 <body style="max-width:800px;margin:20px auto;padding:0 16px;">
-  <p style="margin:0 0 12px;"><a href="<?= hs_base_url('admin/index.php') ?>">← Back to Admin Dashboard</a></p>
+  <?= hs_admin_back_link() ?>
   <h1>Tags</h1>
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 

@@ -1,5 +1,7 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
+require __DIR__ . '/../../app/Modules/Admin/module.php';
+require __DIR__ . '/../../app/Modules/Content/module.php';
 hs_require_admin();
 hs_require_permission('article.create');
 $db = hs_db();
@@ -8,18 +10,6 @@ $db = hs_db();
 $catRes = mysqli_query($db, "SELECT id, name FROM hs_categories ORDER BY name ASC");
 $categories = $catRes ? mysqli_fetch_all($catRes, MYSQLI_ASSOC) : [];
 
-function hs_slugify_local($text) {
-    $text = trim($text);
-    $text = preg_replace('~[^\pL\d]+~u', '-', $text);
-    $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-    $text = preg_replace('~[^-\w]+~', '', $text);
-    $text = trim($text, '-');
-    $text = preg_replace('~-+~', '-', $text);
-    $text = strtolower($text);
-    if (empty($text)) { return 'post-' . time(); }
-    return $text;
-}
-
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hs_csrf_validate()) {
@@ -27,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
     $title   = trim($_POST['title'] ?? '');
     $slug_in = trim($_POST['slug'] ?? '');
-    $slug    = $slug_in !== '' ? $slug_in : hs_slugify_local($title);
+    $slug    = $slug_in !== '' ? $slug_in : hs_content_slugify($title);
     $cat_id  = (int)($_POST['category_id'] ?? 0);
     $type    = $_POST['type'] ?? 'article';
     $region  = $_POST['region'] ?? 'global';
@@ -65,22 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $post_id = mysqli_insert_id($db);
             if ($tags_raw !== '') {
-                $tags = array_filter(array_map('trim', explode(',', $tags_raw)));
-                foreach ($tags as $t) {
-                    if ($t === '') continue;
-                    $slug_tag = hs_slugify_local($t);
-                    $stmtT = mysqli_prepare($db, "INSERT INTO hs_tags (name,slug) VALUES (?,?) ON DUPLICATE KEY UPDATE name=VALUES(name)");
-                    mysqli_stmt_bind_param($stmtT, 'ss', $t, $slug_tag);
-                    mysqli_stmt_execute($stmtT);
-                    $tag_id = mysqli_insert_id($db);
-                    if ($tag_id == 0) {
-                        $resT = mysqli_query($db, "SELECT id FROM hs_tags WHERE slug='".mysqli_real_escape_string($db,$slug_tag)."' LIMIT 1");
-                        if ($resT && ($rowT=mysqli_fetch_assoc($resT))) $tag_id = (int)$rowT['id'];
-                    }
-                    if ($tag_id > 0) {
-                        mysqli_query($db, "INSERT IGNORE INTO hs_post_tags (post_id, tag_id) VALUES (".(int)$post_id.",".(int)$tag_id.")");
-                    }
-                }
+                hs_content_sync_tags($db, (int)$post_id, $tags_raw);
             }
             header('Location: ' . hs_base_url('admin/content/articles.php'));
             exit;
@@ -98,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
 </head>
 <body style="max-width:900px;margin:20px auto;padding:0 16px;">
-  <p style="margin:0 0 12px;"><a href="<?= hs_base_url('admin/index.php') ?>">← Back to Admin Dashboard</a></p>
+  <?= hs_admin_back_link() ?>
   <h1>Add Article</h1>
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
