@@ -1,6 +1,8 @@
 <?php
-session_start();
 require __DIR__ . '/config/config.php';
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 function hs_available_locales() {
     return [

@@ -1,31 +1,41 @@
 <?php
-// NEWS HDSPTV - config bootstrap (V20 enterprise pro)
+// NEWS HDSPTV - runtime config bootstrap
 
 date_default_timezone_set('UTC');
-ini_set('session.use_strict_mode', '1');
 
-$secureCookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => '',
-    'secure' => $secureCookie,
-    'httponly' => true,
-    'samesite' => 'Lax',
-]);
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    ini_set('session.use_strict_mode', '1');
+    $secureCookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $secureCookie,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
 
 $envFile = __DIR__ . '/../.env.php';
 if (!file_exists($envFile)) {
     define('HS_INSTALLED', false);
+    define('HS_APP_NAME', 'NEWS HDSPTV');
+    define('HS_BASE_URL', '/');
+
+    if (!function_exists('hs_db')) {
+        function hs_db() {
+            return null;
+        }
+    }
     return;
 }
 
 require $envFile;
 
 define('HS_INSTALLED', true);
-
 define('HS_APP_NAME', $HS_APP_NAME ?? 'NEWS HDSPTV');
-define('HS_BASE_URL', rtrim($HS_BASE_URL ?? 'https://hdsptv.com/', '/') . '/');
+
+define('HS_BASE_URL', rtrim(($HS_BASE_URL ?? '/'), '/') . '/');
 
 $HS_DB_HOST = $HS_DB_HOST ?? 'localhost';
 $HS_DB_NAME = $HS_DB_NAME ?? 'news_hdsptv';
@@ -42,7 +52,9 @@ if (!$hs_db) {
 }
 mysqli_set_charset($hs_db, 'utf8mb4');
 
-function hs_db() {
-    global $hs_db;
-    return $hs_db;
+if (!function_exists('hs_db')) {
+    function hs_db() {
+        global $hs_db;
+        return $hs_db;
+    }
 }
