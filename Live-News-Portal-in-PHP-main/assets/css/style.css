@@ -1,1 +1,10 @@
 @import url('../../../assets/css/style.css');
+
+/* Legacy package bridge: keep palette synchronized with the root application. */
+:root {
+  --primary: #D60000;
+  --dark: #111111;
+  --bg: #F6F7FB;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+}
