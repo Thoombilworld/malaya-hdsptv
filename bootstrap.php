@@ -168,6 +168,42 @@ function hs_top_categories($limit = 5) {
     return $rows;
 }
 
+
+
+function hs_csrf_token() {
+    if (empty($_SESSION['hs_csrf_token'])) {
+        $_SESSION['hs_csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['hs_csrf_token'];
+}
+
+function hs_csrf_input() {
+    return '<input type="hidden" name="_csrf" value="' . htmlspecialchars(hs_csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+}
+
+function hs_csrf_validate() {
+    $token = $_POST['_csrf'] ?? '';
+    $valid = !empty($_SESSION['hs_csrf_token']) && hash_equals($_SESSION['hs_csrf_token'], $token);
+    if (!$valid) {
+        http_response_code(422);
+    }
+    return $valid;
+}
+
+function hs_log_event($level, $message, array $context = []) {
+    $dir = __DIR__ . '/writable/logs';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0777, true);
+    }
+    $payload = [
+        'time' => date('c'),
+        'level' => $level,
+        'message' => $message,
+        'context' => $context,
+    ];
+    @file_put_contents($dir . '/app.log', json_encode($payload, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
+}
+
 // Admin auth helpers
 function hs_is_admin_logged_in() {
     return !empty($_SESSION['hs_admin_id']);

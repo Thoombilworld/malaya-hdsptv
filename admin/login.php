@@ -6,10 +6,15 @@ if (hs_is_admin_logged_in()) {
 }
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Refresh and try again.';
+    }
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (hs_auth_is_locked($email)) {
+    if ($error !== '') {
+        // CSRF failed
+    } elseif (hs_auth_is_locked($email)) {
         $error = 'Too many failed attempts. Please wait 15 minutes and try again.';
     } elseif (defined('HS_INSTALLED') && HS_INSTALLED) {
         $stmt = mysqli_prepare(hs_db(), "SELECT id, password_hash, name, role FROM hs_users WHERE email = ? LIMIT 1");
@@ -26,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['hs_admin_name'] = $user['name'];
             $_SESSION['hs_admin_role'] = $user['role'];
 
+            hs_log_event('info', 'Admin login success', ['user_id' => $user['id'], 'role' => $user['role']]);
             if ($user['role'] === 'reporter') {
                 header('Location: ' . hs_base_url('admin/content/article_add.php'));
             } else {
@@ -34,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         hs_auth_record_failure($email);
+        hs_log_event('warning', 'Admin login failed', ['email' => $email]);
         $error = 'Invalid credentials or insufficient role permissions.';
     } else {
         $error = 'System is not installed. Run /install first.';
@@ -68,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php endif; ?>
 
       <form method="post" novalidate>
+        <?= hs_csrf_input() ?>
         <div class="field">
           <label for="email">Email</label>
           <input type="email" id="email" name="email" required autocomplete="email">

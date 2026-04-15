@@ -2,26 +2,35 @@
 require __DIR__ . '/../bootstrap.php';
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name  = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $pass  = $_POST['password'] ?? '';
-    $pass2 = $_POST['password_confirm'] ?? '';
-    if ($name === '' || $email === '' || $pass === '') {
-        $error = 'Please fill all required fields.';
-    } elseif ($pass !== $pass2) {
-        $error = 'Passwords do not match.';
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Please refresh and try again.';
     } else {
-        $hash = password_hash($pass, PASSWORD_BCRYPT);
-        $stmt = mysqli_prepare(hs_db(), "INSERT INTO hs_frontend_users (name, email, password_hash) VALUES (?, ?, ?)");
-        if (!$stmt) {
-            $error = 'System error.';
+        $name  = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $pass  = $_POST['password'] ?? '';
+        $pass2 = $_POST['password_confirm'] ?? '';
+        if ($name === '' || $email === '' || $pass === '') {
+            $error = 'Please fill all required fields.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Please enter a valid email.';
+        } elseif (strlen($pass) < 8) {
+            $error = 'Password must be at least 8 characters.';
+        } elseif ($pass !== $pass2) {
+            $error = 'Passwords do not match.';
         } else {
-            mysqli_stmt_bind_param($stmt, 'sss', $name, $email, $hash);
-            if (!@mysqli_stmt_execute($stmt)) {
-                $error = 'Email already in use.';
+            $hash = password_hash($pass, PASSWORD_BCRYPT);
+            $stmt = mysqli_prepare(hs_db(), "INSERT INTO hs_frontend_users (name, email, password_hash) VALUES (?, ?, ?)");
+            if (!$stmt) {
+                $error = 'System error.';
             } else {
-                header('Location: ' . hs_base_url('auth/login.php'));
-                exit;
+                mysqli_stmt_bind_param($stmt, 'sss', $name, $email, $hash);
+                if (!@mysqli_stmt_execute($stmt)) {
+                    $error = 'Email already in use.';
+                } else {
+                    hs_log_event('info', 'Frontend registration', ['email' => $email]);
+                    header('Location: ' . hs_base_url('auth/login.php'));
+                    exit;
+                }
             }
         }
     }
@@ -38,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <h1>User Registration</h1>
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <form method="post">
+    <?= hs_csrf_input() ?>
     <label>Name</label><br>
     <input type="text" name="name" style="width:100%;" required><br><br>
     <label>Email</label><br>

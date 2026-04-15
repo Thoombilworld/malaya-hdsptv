@@ -1,6 +1,19 @@
 <?php
 // NEWS HDSPTV - config bootstrap (V20 enterprise pro)
 
+date_default_timezone_set('UTC');
+ini_set('session.use_strict_mode', '1');
+
+$secureCookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $secureCookie,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+
 $envFile = __DIR__ . '/../.env.php';
 if (!file_exists($envFile)) {
     define('HS_INSTALLED', false);

@@ -8,6 +8,9 @@ $db = hs_db();
 $error = '';
 $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Refresh and submit again.';
+    } else {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $role = $_POST['role'] ?? 'reporter';
@@ -25,9 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_bind_param($stmt, 'ssss', $name, $email, $hash, $role);
         if (mysqli_stmt_execute($stmt)) {
             $success = 'Staff user created successfully.';
+            hs_log_event('info', 'Admin created staff user', ['email' => $email, 'role' => $role]);
         } else {
             $error = 'Could not create user: ' . mysqli_error($db);
         }
+    }
     }
 }
 
@@ -44,6 +49,7 @@ hs_admin_shell_start('Staff Users – HDSPTV', 'Users & Roles', 'staff');
     <?php if ($success): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
     <form method="post">
+      <?= hs_csrf_input() ?>
       <div class="field"><label>Name</label><input type="text" name="name" required></div>
       <div class="field"><label>Email</label><input type="email" name="email" required></div>
       <div class="field">
