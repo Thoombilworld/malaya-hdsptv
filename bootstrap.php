@@ -296,8 +296,16 @@ function hs_settings() {
     return $settings;
 }
 
+function hs_db_connected() {
+    return defined('HS_DB_CONNECTED') ? HS_DB_CONNECTED : (bool) hs_db();
+}
+
+function hs_db_error_message() {
+    return defined('HS_DB_ERROR') ? (string) HS_DB_ERROR : '';
+}
+
 function hs_query_value($sql, $default = 0) {
-    if (!defined('HS_INSTALLED') || !HS_INSTALLED) {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db_connected()) {
         return $default;
     }
     $res = mysqli_query(hs_db(), $sql);
@@ -473,8 +481,18 @@ function hs_is_admin_logged_in() {
     return !empty($_SESSION['hs_admin_id']);
 }
 function hs_require_admin() {
-    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db()) {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED) {
         header('Location: ' . hs_base_url('install/index.php'));
+        exit;
+    }
+    if (!hs_db_connected()) {
+        http_response_code(503);
+        echo '<h2>Database connection unavailable</h2>';
+        echo '<p>The admin panel cannot connect to MySQL right now. Verify DB credentials in <code>.env.php</code>.</p>';
+        $err = hs_db_error_message();
+        if ($err !== '') {
+            echo '<pre>' . htmlspecialchars($err, ENT_QUOTES, 'UTF-8') . '</pre>';
+        }
         exit;
     }
     if (!hs_is_admin_logged_in()) {
@@ -485,7 +503,7 @@ function hs_require_admin() {
 
 // Frontend user helpers
 function hs_current_user() {
-    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db()) return null;
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db_connected()) return null;
     if (empty($_SESSION['hs_user_id'])) return null;
     $id = (int) $_SESSION['hs_user_id'];
     $res = mysqli_query(hs_db(), "SELECT id, name, email, is_premium FROM hs_frontend_users WHERE id = " . $id . " LIMIT 1");

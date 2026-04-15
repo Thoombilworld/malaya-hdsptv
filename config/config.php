@@ -43,14 +43,15 @@ $HS_DB_USER = $HS_DB_USER ?? 'root';
 $HS_DB_PASS = $HS_DB_PASS ?? '';
 
 $hs_db = @mysqli_connect($HS_DB_HOST, $HS_DB_USER, $HS_DB_PASS, $HS_DB_NAME);
+$hs_db_error = '';
 if (!$hs_db) {
-    if (php_sapi_name() === 'cli') {
-        die('Database connection failed: ' . mysqli_connect_error());
-    }
-    echo "<h2>Database connection failed</h2><p>Please check .env.php.</p>";
-    exit;
+    $hs_db_error = mysqli_connect_error();
+    define('HS_DB_CONNECTED', false);
+} else {
+    define('HS_DB_CONNECTED', true);
+    mysqli_set_charset($hs_db, 'utf8mb4');
 }
-mysqli_set_charset($hs_db, 'utf8mb4');
+define('HS_DB_ERROR', $hs_db_error);
 
 if (!function_exists('hs_db')) {
     function hs_db() {

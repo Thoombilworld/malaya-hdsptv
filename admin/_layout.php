@@ -3,12 +3,19 @@
 function hs_admin_nav_items(): array {
     $all = [
         'dashboard' => ['label' => 'Dashboard', 'href' => hs_base_url('admin/index.php'), 'permission' => 'dashboard.view'],
-        'content' => ['label' => 'All News', 'href' => hs_base_url('admin/content/index.php'), 'permission' => 'article.create'],
+        'content' => ['label' => 'News', 'href' => hs_base_url('admin/content/index.php'), 'permission' => 'article.create'],
+        'breaking' => ['label' => 'Breaking News', 'href' => hs_base_url('admin/content/articles.php?status=published'), 'permission' => 'article.publish'],
+        'live' => ['label' => 'Live TV', 'href' => hs_base_url('admin/homepage.php'), 'permission' => 'article.publish'],
+        'categories' => ['label' => 'Categories', 'href' => hs_base_url('admin/content/categories.php'), 'permission' => 'category.manage'],
+        'media' => ['label' => 'Media Library', 'href' => hs_base_url('admin/content/article_add.php'), 'permission' => 'article.create'],
+        'videos' => ['label' => 'Videos', 'href' => hs_base_url('admin/content/articles.php'), 'permission' => 'article.create'],
         'homepage' => ['label' => 'Homepage', 'href' => hs_base_url('admin/homepage.php'), 'permission' => 'article.publish'],
         'seo' => ['label' => 'SEO', 'href' => hs_base_url('admin/seo.php'), 'permission' => 'seo.manage'],
         'social' => ['label' => 'Social', 'href' => hs_base_url('admin/social.php'), 'permission' => 'seo.manage'],
         'ads' => ['label' => 'Ads', 'href' => hs_base_url('admin/ads.php'), 'permission' => 'ads.manage'],
         'staff' => ['label' => 'Users & Roles', 'href' => hs_base_url('admin/users.php'), 'permission' => 'user.manage'],
+        'analytics' => ['label' => 'Analytics', 'href' => hs_base_url('admin/index.php'), 'permission' => 'dashboard.view'],
+        'settings' => ['label' => 'Settings', 'href' => hs_base_url('admin/seo.php'), 'permission' => 'settings.manage'],
         'logs' => ['label' => 'Audit Logs', 'href' => hs_base_url('admin/logs.php'), 'permission' => 'settings.manage'],
         'logout' => ['label' => 'Logout', 'href' => hs_base_url('admin/logout.php'), 'permission' => null],
     ];
@@ -54,11 +61,21 @@ function hs_admin_shell_start(string $title, string $pageTitle, string $active =
         <button class="admin-menu-toggle" type="button" data-admin-menu-toggle aria-controls="admin-sidebar" aria-expanded="false">Menu</button>
         <div>
           <h1><?= htmlspecialchars($pageTitle) ?></h1>
-          <div class="meta">Welcome, <?= htmlspecialchars($_SESSION['hs_admin_name'] ?? 'Admin') ?> · Editorial operations center</div>
+          <div class="meta">Welcome, <?= htmlspecialchars($_SESSION['hs_admin_name'] ?? 'Admin') ?> · Broadcast-grade editorial control</div>
         </div>
         <div class="admin-actions">
-          <a class="btn btn-secondary" href="<?= hs_base_url('admin/content/article_add.php') ?>">Create Story</a>
-          <a class="btn btn-primary" href="<?= hs_base_url('admin/homepage.php') ?>">Manage Homepage</a>
+          <div class="admin-search">
+            <form method="get" action="<?= hs_base_url('admin/content/articles.php') ?>">
+              <input type="text" name="q" placeholder="Global search stories...">
+            </form>
+          </div>
+          <a class="btn btn-secondary" href="<?= hs_base_url('admin/content/article_add.php') ?>">+ Create News</a>
+          <a class="btn btn-secondary" href="<?= hs_base_url('admin/homepage.php') ?>">Go Live</a>
+          <a class="btn btn-secondary" href="<?= hs_base_url('admin/social_dispatch.php') ?>">Send Alert</a>
+          <a class="btn btn-primary" href="<?= hs_base_url('admin/content/article_add.php') ?>">Upload Video</a>
+          <span class="admin-live-pill">LIVE DESK</span>
+          <button class="btn btn-secondary" type="button" data-theme-toggle>Dark/Light</button>
+          <div class="admin-time" data-admin-time></div>
         </div>
       </div>
     </header>

@@ -32,6 +32,13 @@ body.admin-body {
   background: var(--bg);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
+body.admin-body.theme-dark {
+  --bg: #0b1220;
+  --card: #111827;
+  --border: #253047;
+  --dark: #F3F4F6;
+  --gray: #9CA3AF;
+}
 
 .admin-sidebar-overlay {
   position: fixed;
@@ -99,6 +106,36 @@ body.admin-body {
 .admin-topbar h1 { margin: 0; font-size: clamp(30px, 2.5vw, 38px); line-height: 1.1; }
 .admin-topbar .meta { color: var(--gray); font-size: 13px; }
 .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.admin-search input {
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 12px;
+  min-width: 220px;
+  background: #fff;
+}
+.admin-live-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #FEE2E2;
+  color: #991B1B;
+  font-size: 12px;
+  font-weight: 800;
+}
+.admin-time {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--gray);
+  background: #fff;
+}
 
 .admin-page {
   max-width: var(--admin-max);
@@ -124,6 +161,13 @@ body.admin-body {
 .card h3 { margin: 0 0 8px; font-size: 18px; }
 .kpi-value { font-size: 30px; font-weight: 800; line-height: 1.1; margin-top: 8px; }
 .kpi-label, .muted { color: var(--gray); font-size: 13px; }
+.control-center {
+  border: 1px solid #FCA5A5;
+  background: #FEF2F2;
+}
+.workflow-actions a {
+  margin-right: 8px;
+}
 
 .btn {
   display: inline-flex;
