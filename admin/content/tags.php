@@ -1,8 +1,8 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
-require __DIR__ . '/../../app/Modules/Admin/module.php';
 hs_require_admin();
 hs_require_permission('tag.manage');
+require __DIR__ . '/../_layout.php';
 $db = hs_db();
 $error = '';
 
@@ -41,43 +41,46 @@ if ($has_tags) {
         $tags = mysqli_fetch_all($tr, MYSQLI_ASSOC);
     }
 }
+
+hs_admin_shell_start('Tags – HDSPTV', 'Tags', 'content');
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Tags – NEWS HDSPTV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-</head>
-<body style="max-width:800px;margin:20px auto;padding:0 16px;">
-  <?= hs_admin_back_link() ?>
-  <h1>Tags</h1>
-  <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-  <h2>Add Tag</h2>
-  <form method="post">
+<section class="grid-12">
+  <article class="card col-4 col-md-12">
+    <h2>Add Tag</h2>
+    <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <form method="post">
     <?= hs_csrf_input() ?>
-    <label>Name</label><br>
-    <input type="text" name="name" style="width:100%;" required><br><br>
-    <button type="submit">Save Tag</button>
-  </form>
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" required>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Tag</button>
+    </form>
+  </article>
 
-  <h2 style="margin-top:20px;">Existing Tags</h2>
-  <?php if (!$has_tags): ?>
-    <p><strong>Note:</strong> Table <code>hs_tags</code> not found. Make sure you ran the latest installer SQL.</p>
-  <?php else: ?>
-    <table border="1" cellpadding="4" cellspacing="0" width="100%">
-      <tr><th>ID</th><th>Name</th><th>Slug</th><th>Actions</th></tr>
-      <?php foreach ($tags as $t): ?>
-        <tr>
-          <td><?= (int)$t['id'] ?></td>
-          <td><?= htmlspecialchars($t['name']) ?></td>
-          <td><?= htmlspecialchars($t['slug']) ?></td>
-          <td><a href="<?= hs_base_url('admin/content/tags.php?delete='.(int)$t['id']) ?>" onclick="return confirm('Delete this tag?')">Delete</a></td>
-        </tr>
-      <?php endforeach; ?>
-    </table>
-  <?php endif; ?>
-</body>
-</html>
+  <article class="card col-8 col-md-12">
+    <h2>Existing Tags</h2>
+    <?php if (!$has_tags): ?>
+      <p class="muted"><strong>Note:</strong> Table <code>hs_tags</code> not found. Make sure you ran the latest installer SQL.</p>
+    <?php else: ?>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Actions</th></tr></thead>
+          <tbody>
+          <?php foreach ($tags as $t): ?>
+            <tr>
+              <td><?= (int)$t['id'] ?></td>
+              <td><?= htmlspecialchars($t['name']) ?></td>
+              <td><?= htmlspecialchars($t['slug']) ?></td>
+              <td><a href="<?= hs_base_url('admin/content/tags.php?delete='.(int)$t['id']) ?>" onclick="return confirm('Delete this tag?')">Delete</a></td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
+  </article>
+</section>
+
+<?php hs_admin_shell_end(); ?>

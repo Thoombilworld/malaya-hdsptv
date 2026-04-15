@@ -4,6 +4,7 @@ require __DIR__ . '/../../app/Modules/Admin/module.php';
 require __DIR__ . '/../../app/Modules/Content/module.php';
 hs_require_admin();
 hs_require_permission('article.create');
+require __DIR__ . '/../_layout.php';
 $db = hs_db();
 
 // categories for select
@@ -63,78 +64,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     }
 }
+
+hs_admin_shell_start('Add Article – HDSPTV', 'Create News', 'content');
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Add Article – NEWS HDSPTV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-</head>
-<body style="max-width:900px;margin:20px auto;padding:0 16px;">
-  <?= hs_admin_back_link() ?>
-  <h1>Add Article</h1>
-  <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+<section class="card" style="max-width:980px;">
+  <h2>Add Article</h2>
+  <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <?= hs_csrf_input() ?>
-    <label>Title</label><br>
-    <input type="text" name="title" style="width:100%;" required><br><br>
+    <div class="field"><label>Title</label><input type="text" name="title" required></div>
+    <div class="field"><label>Slug (optional)</label><input type="text" name="slug"></div>
+    <div class="field">
+      <label>Category</label>
+      <select name="category_id">
+        <option value="0">-- None --</option>
+        <?php foreach ($categories as $c): ?>
+          <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
 
-    <label>Slug (optional)</label><br>
-    <input type="text" name="slug" style="width:100%;"><br><br>
+    <div class="grid-12" style="gap:16px;">
+      <div class="col-6 col-md-12 field">
+        <label>Type</label>
+        <select name="type">
+          <option value="article">Article</option>
+          <option value="video">Video</option>
+          <option value="gallery">Gallery</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-12 field">
+        <label>Region</label>
+        <select name="region">
+          <option value="global">Global</option>
+          <option value="india">India</option>
+          <option value="gcc">GCC</option>
+          <option value="kerala">Kerala</option>
+          <option value="world">World</option>
+          <option value="sports">Sports</option>
+        </select>
+      </div>
+    </div>
 
-    <label>Category</label><br>
-    <select name="category_id" style="width:100%;">
-      <option value="0">-- None --</option>
-      <?php foreach ($categories as $c): ?>
-        <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-      <?php endforeach; ?>
-    </select><br><br>
+    <div class="field">
+      <label>Short Description (Excerpt)</label>
+      <textarea name="excerpt" style="width:100%;height:80px;border:1px solid var(--border);border-radius:12px;padding:12px;"></textarea>
+    </div>
+    <div class="field">
+      <label>Content (HTML allowed)</label>
+      <textarea name="content" style="width:100%;height:220px;border:1px solid var(--border);border-radius:12px;padding:12px;"></textarea>
+    </div>
 
-    <label>Type</label><br>
-    <select name="type">
-      <option value="article">Article</option>
-      <option value="video">Video</option>
-      <option value="gallery">Gallery</option>
-    </select><br><br>
+    <div class="field"><label>Main Image</label><input type="file" name="image_main"></div>
+    <div class="field"><label>Video URL (YouTube / MP4 link)</label><input type="text" name="video_url"></div>
+    <div class="field"><label>Tags (comma separated)</label><input type="text" name="tags"></div>
 
-    <label>Region</label><br>
-    <select name="region">
-      <option value="global">Global</option>
-      <option value="india">India</option>
-      <option value="gcc">GCC</option>
-      <option value="kerala">Kerala</option>
-      <option value="world">World</option>
-      <option value="sports">Sports</option>
-    </select><br><br>
+    <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" name="is_breaking"> Breaking</label>
+    <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" name="is_featured"> Featured</label>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:16px;"><input type="checkbox" name="is_trending"> Trending</label>
 
-    <label>Short Description (Excerpt)</label><br>
-    <textarea name="excerpt" style="width:100%;height:60px;"></textarea><br><br>
-
-    <label>Content (HTML allowed)</label><br>
-    <textarea name="content" style="width:100%;height:200px;"></textarea><br><br>
-
-    <label>Main Image</label><br>
-    <input type="file" name="image_main"><br><br>
-
-    <label>Video URL (YouTube / MP4 link)</label><br>
-    <input type="text" name="video_url" style="width:100%;"><br><br>
-
-    <label>Tags (comma separated)</label><br>
-    <input type="text" name="tags" style="width:100%;"><br><br>
-
-    <label><input type="checkbox" name="is_breaking"> Breaking</label><br>
-    <label><input type="checkbox" name="is_featured"> Featured</label><br>
-    <label><input type="checkbox" name="is_trending"> Trending</label><br><br>
-
-    <label>Status</label><br>
-    <select name="status">
-      <option value="draft">Draft</option>
-      <option value="published">Published</option>
-    </select><br><br>
-
-    <button type="submit">Save Article</button>
+    <div class="field" style="max-width:260px;">
+      <label>Status</label>
+      <select name="status">
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Save Article</button>
   </form>
-</body>
-</html>
+</section>
+
+<?php hs_admin_shell_end(); ?>

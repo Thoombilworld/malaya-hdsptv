@@ -4,6 +4,7 @@ require __DIR__ . '/../../app/Modules/Admin/module.php';
 require __DIR__ . '/../../app/Modules/Content/module.php';
 hs_require_admin();
 hs_require_permission('article.edit');
+require __DIR__ . '/../_layout.php';
 $db = hs_db();
 
 // categories for select
@@ -93,81 +94,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tags_str = $tags_raw;
     }
 }
+
+hs_admin_shell_start('Edit Article – HDSPTV', 'Edit News', 'content');
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Edit Article – NEWS HDSPTV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-</head>
-<body style="max-width:900px;margin:20px auto;padding:0 16px;">
-  <?= hs_admin_back_link() ?>
-  <h1>Edit Article</h1>
-  <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+<section class="card" style="max-width:980px;">
+  <h2>Edit Article</h2>
+  <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
     <?= hs_csrf_input() ?>
-    <label>Title</label><br>
-    <input type="text" name="title" style="width:100%;" required value="<?= htmlspecialchars($post['title']) ?>"><br><br>
+    <div class="field"><label>Title</label><input type="text" name="title" required value="<?= htmlspecialchars($post['title']) ?>"></div>
+    <div class="field"><label>Slug</label><input type="text" name="slug" value="<?= htmlspecialchars($post['slug']) ?>"></div>
+    <div class="field">
+      <label>Category</label>
+      <select name="category_id">
+        <option value="0">-- None --</option>
+        <?php foreach ($categories as $c): ?>
+          <option value="<?= (int)$c['id'] ?>" <?= $post['category_id']==$c['id']?'selected':'' ?>><?= htmlspecialchars($c['name']) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
 
-    <label>Slug</label><br>
-    <input type="text" name="slug" style="width:100%;" value="<?= htmlspecialchars($post['slug']) ?>"><br><br>
+    <div class="grid-12" style="gap:16px;">
+      <div class="col-6 col-md-12 field">
+        <label>Type</label>
+        <select name="type">
+          <option value="article" <?= $post['type']=='article'?'selected':'' ?>>Article</option>
+          <option value="video" <?= $post['type']=='video'?'selected':'' ?>>Video</option>
+          <option value="gallery" <?= $post['type']=='gallery'?'selected':'' ?>>Gallery</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-12 field">
+        <label>Region</label>
+        <select name="region">
+          <option value="global" <?= $post['region']=='global'?'selected':'' ?>>Global</option>
+          <option value="india" <?= $post['region']=='india'?'selected':'' ?>>India</option>
+          <option value="gcc" <?= $post['region']=='gcc'?'selected':'' ?>>GCC</option>
+          <option value="kerala" <?= $post['region']=='kerala'?'selected':'' ?>>Kerala</option>
+          <option value="world" <?= $post['region']=='world'?'selected':'' ?>>World</option>
+          <option value="sports" <?= $post['region']=='sports'?'selected':'' ?>>Sports</option>
+        </select>
+      </div>
+    </div>
 
-    <label>Category</label><br>
-    <select name="category_id" style="width:100%;">
-      <option value="0">-- None --</option>
-      <?php foreach ($categories as $c): ?>
-        <option value="<?= (int)$c['id'] ?>" <?= $post['category_id']==$c['id']?'selected':'' ?>><?= htmlspecialchars($c['name']) ?></option>
-      <?php endforeach; ?>
-    </select><br><br>
+    <div class="field"><label>Short Description (Excerpt)</label><textarea name="excerpt" style="width:100%;height:80px;border:1px solid var(--border);border-radius:12px;padding:12px;"><?= htmlspecialchars($post['excerpt']) ?></textarea></div>
+    <div class="field"><label>Content (HTML allowed)</label><textarea name="content" style="width:100%;height:220px;border:1px solid var(--border);border-radius:12px;padding:12px;"><?= htmlspecialchars($post['content']) ?></textarea></div>
 
-    <label>Type</label><br>
-    <select name="type">
-      <option value="article" <?= $post['type']=='article'?'selected':'' ?>>Article</option>
-      <option value="video" <?= $post['type']=='video'?'selected':'' ?>>Video</option>
-      <option value="gallery" <?= $post['type']=='gallery'?'selected':'' ?>>Gallery</option>
-    </select><br><br>
-
-    <label>Region</label><br>
-    <select name="region">
-      <option value="global" <?= $post['region']=='global'?'selected':'' ?>>Global</option>
-      <option value="india" <?= $post['region']=='india'?'selected':'' ?>>India</option>
-      <option value="gcc" <?= $post['region']=='gcc'?'selected':'' ?>>GCC</option>
-      <option value="kerala" <?= $post['region']=='kerala'?'selected':'' ?>>Kerala</option>
-      <option value="world" <?= $post['region']=='world'?'selected':'' ?>>World</option>
-      <option value="sports" <?= $post['region']=='sports'?'selected':'' ?>>Sports</option>
-    </select><br><br>
-
-    <label>Short Description (Excerpt)</label><br>
-    <textarea name="excerpt" style="width:100%;height:60px;"><?= htmlspecialchars($post['excerpt']) ?></textarea><br><br>
-
-    <label>Content (HTML allowed)</label><br>
-    <textarea name="content" style="width:100%;height:200px;"><?= htmlspecialchars($post['content']) ?></textarea><br><br>
-
-    <label>Main Image</label><br>
+    <div class="field">
+      <label>Main Image</label>
     <?php if (!empty($post['image_main'])): ?>
-      <div>Current: <?= htmlspecialchars($post['image_main']) ?></div>
+      <p class="muted" style="margin:0;">Current: <?= htmlspecialchars($post['image_main']) ?></p>
     <?php endif; ?>
-    <input type="file" name="image_main"><br><br>
+      <input type="file" name="image_main">
+    </div>
 
-    <label>Video URL (YouTube / MP4 link)</label><br>
-    <input type="text" name="video_url" style="width:100%;" value="<?= htmlspecialchars($post['video_url']) ?>"><br><br>
+    <div class="field"><label>Video URL (YouTube / MP4 link)</label><input type="text" name="video_url" value="<?= htmlspecialchars($post['video_url']) ?>"></div>
+    <div class="field"><label>Tags (comma separated)</label><input type="text" name="tags" value="<?= htmlspecialchars($tags_str) ?>"></div>
 
-    <label>Tags (comma separated)</label><br>
-    <input type="text" name="tags" style="width:100%;" value="<?= htmlspecialchars($tags_str) ?>"><br><br>
+    <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" name="is_breaking" <?= $post['is_breaking']?'checked':'' ?>> Breaking</label>
+    <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" name="is_featured" <?= $post['is_featured']?'checked':'' ?>> Featured</label>
+    <label style="display:flex;gap:8px;align-items:center;margin-bottom:16px;"><input type="checkbox" name="is_trending" <?= $post['is_trending']?'checked':'' ?>> Trending</label>
 
-    <label><input type="checkbox" name="is_breaking" <?= $post['is_breaking']?'checked':'' ?>> Breaking</label><br>
-    <label><input type="checkbox" name="is_featured" <?= $post['is_featured']?'checked':'' ?>> Featured</label><br>
-    <label><input type="checkbox" name="is_trending" <?= $post['is_trending']?'checked':'' ?>> Trending</label><br><br>
+    <div class="field" style="max-width:260px;">
+      <label>Status</label>
+      <select name="status">
+        <option value="draft" <?= $post['status']=='draft'?'selected':'' ?>>Draft</option>
+        <option value="published" <?= $post['status']=='published'?'selected':'' ?>>Published</option>
+      </select>
+    </div>
 
-    <label>Status</label><br>
-    <select name="status">
-      <option value="draft" <?= $post['status']=='draft'?'selected':'' ?>>Draft</option>
-      <option value="published" <?= $post['status']=='published'?'selected':'' ?>>Published</option>
-    </select><br><br>
-
-    <button type="submit">Update Article</button>
+    <button class="btn btn-primary" type="submit">Update Article</button>
   </form>
-</body>
-</html>
+</section>
+
+<?php hs_admin_shell_end(); ?>

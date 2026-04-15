@@ -2,6 +2,7 @@
 require __DIR__ . '/../bootstrap.php';
 hs_require_admin();
 hs_require_permission('settings.manage');
+require __DIR__ . '/_layout.php';
 
 $settings = hs_settings();
 $db = hs_db();
@@ -71,26 +72,22 @@ if ($recentRes) {
         $recent[] = $row;
     }
 }
-?>
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Social Dispatcher – NEWS HDSPTV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-</head>
-<body style="max-width:860px;margin:20px auto;padding:0 16px;">
-  <h1>Social Dispatcher</h1>
-  <p><a href="<?= hs_base_url('admin/social.php') ?>">← Back to Social Settings</a></p>
-  <?php if ($message): ?><div class="success-msg"><?= htmlspecialchars($message) ?></div><?php endif; ?>
-  <?php if ($error): ?><div class="error-msg"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-  <form method="post" class="auth-card" style="max-width:100%;">
+hs_admin_shell_start('Social Dispatcher – HDSPTV', 'Social Dispatcher', 'social');
+?>
+
+<section class="card" style="max-width:940px;">
+  <h2>Dispatch Published Story</h2>
+  <p class="muted">Send published articles to your external webhook automation pipeline.</p>
+  <p><a class="btn btn-secondary" href="<?= hs_base_url('admin/social.php') ?>">Back to Social Settings</a></p>
+  <?php if ($message): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
+  <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+
+  <form method="post">
     <?= hs_csrf_input() ?>
-    <div class="auth-field">
+    <div class="field">
       <label for="post_id">Select Published Article</label>
-      <select id="post_id" name="post_id" required style="height:48px;border:1px solid #d1d5db;border-radius:12px;padding:0 10px;">
+      <select id="post_id" name="post_id" required>
         <option value="">Choose article…</option>
         <?php foreach ($recent as $row): ?>
           <option value="<?= (int)$row['id'] ?>"><?= htmlspecialchars($row['title']) ?> (<?= htmlspecialchars($row['created_at']) ?>)</option>
@@ -98,8 +95,9 @@ if ($recentRes) {
       </select>
     </div>
 
-    <div class="meta" style="margin-bottom:12px;">Webhook: <?= htmlspecialchars($settings['social_distribution_webhook'] ?? 'Not configured') ?></div>
+    <p class="muted" style="margin-bottom:12px;">Webhook: <?= htmlspecialchars($settings['social_distribution_webhook'] ?? 'Not configured') ?></p>
     <button class="btn btn-primary" type="submit">Dispatch to Automation</button>
   </form>
-</body>
-</html>
+</section>
+
+<?php hs_admin_shell_end(); ?>

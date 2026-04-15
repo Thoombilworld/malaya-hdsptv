@@ -1,8 +1,8 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
-require __DIR__ . '/../../app/Modules/Admin/module.php';
 hs_require_admin();
 hs_require_permission('category.manage');
+require __DIR__ . '/../_layout.php';
 $db = hs_db();
 $error = '';
 
@@ -42,50 +42,57 @@ $res = mysqli_query($db, "SELECT * FROM hs_categories ORDER BY parent_id ASC, na
 $categories = $res ? mysqli_fetch_all($res, MYSQLI_ASSOC) : [];
 $byId = [];
 foreach ($categories as $c) $byId[$c['id']] = $c;
+
+hs_admin_shell_start('Categories – HDSPTV', 'Categories', 'content');
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Categories – NEWS HDSPTV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
-</head>
-<body style="max-width:900px;margin:20px auto;padding:0 16px;">
-  <?= hs_admin_back_link() ?>
-  <h1>Categories (Parent + Sub)</h1>
-  <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-  <h2>Add Category</h2>
-  <form method="post">
+<section class="grid-12">
+  <article class="card col-4 col-md-12">
+    <h2>Add Category</h2>
+    <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <form method="post">
     <?= hs_csrf_input() ?>
-    <label>Name</label><br>
-    <input type="text" name="name" style="width:100%;" required><br><br>
-    <label>Slug (optional)</label><br>
-    <input type="text" name="slug" style="width:100%;"><br><br>
-    <label>Parent Category</label><br>
-    <select name="parent_id" style="width:100%;">
-      <option value="0">-- None (Top level) --</option>
-      <?php foreach ($categories as $c): ?>
-        <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-      <?php endforeach; ?>
-    </select><br><br>
-    <button type="submit">Save Category</button>
-  </form>
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="field">
+        <label>Slug (optional)</label>
+        <input type="text" name="slug">
+      </div>
+      <div class="field">
+        <label>Parent Category</label>
+        <select name="parent_id">
+          <option value="0">-- None (Top level) --</option>
+          <?php foreach ($categories as $c): ?>
+            <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Category</button>
+    </form>
+  </article>
 
-  <h2 style="margin-top:20px;">Existing Categories</h2>
-  <table border="1" cellpadding="4" cellspacing="0" width="100%">
-    <tr><th>ID</th><th>Name</th><th>Slug</th><th>Parent</th><th>Actions</th></tr>
-    <?php foreach ($categories as $c): ?>
-      <?php $parentName = $c['parent_id'] && isset($byId[$c['parent_id']]) ? $byId[$c['parent_id']]['name'] : '—'; ?>
-      <tr>
-        <td><?= (int)$c['id'] ?></td>
-        <td><?= htmlspecialchars($c['name']) ?></td>
-        <td><?= htmlspecialchars($c['slug']) ?></td>
-        <td><?= htmlspecialchars($parentName) ?></td>
-        <td><a href="<?= hs_base_url('admin/content/categories.php?delete='.(int)$c['id']) ?>" onclick="return confirm('Delete this category?')">Delete</a></td>
-      </tr>
-    <?php endforeach; ?>
-  </table>
-</body>
-</html>
+  <article class="card col-8 col-md-12">
+    <h2>Existing Categories</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>ID</th><th>Name</th><th>Slug</th><th>Parent</th><th>Actions</th></tr></thead>
+        <tbody>
+          <?php foreach ($categories as $c): ?>
+            <?php $parentName = $c['parent_id'] && isset($byId[$c['parent_id']]) ? $byId[$c['parent_id']]['name'] : '—'; ?>
+            <tr>
+              <td><?= (int)$c['id'] ?></td>
+              <td><?= htmlspecialchars($c['name']) ?></td>
+              <td><?= htmlspecialchars($c['slug']) ?></td>
+              <td><?= htmlspecialchars($parentName) ?></td>
+              <td><a href="<?= hs_base_url('admin/content/categories.php?delete='.(int)$c['id']) ?>" onclick="return confirm('Delete this category?')">Delete</a></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<?php hs_admin_shell_end(); ?>
