@@ -4,10 +4,28 @@
   <meta charset="utf-8">
   <title><?= htmlspecialchars($settings['site_title'] ?? 'NEWS HDSPTV') ?></title>
   <meta name="description" content="<?= htmlspecialchars($settings['seo_meta_description'] ?? ($settings['tagline'] ?? '')) ?>">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="<?= htmlspecialchars(hs_base_url('/')) ?>">
+  <?= hs_hreflang_links('/') ?>
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="<?= htmlspecialchars(hs_base_url('sitemap.xml')) ?>">
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name": <?= json_encode($settings['site_title'] ?? 'NEWS HDSPTV') ?>,
+    "url": <?= json_encode(hs_base_url('/')) ?>,
+    "inLanguage": <?= json_encode(hs_locale()) ?>,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": <?= json_encode(hs_base_url('search.php?q={search_term_string}')) ?>,
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 <body>
 <?php

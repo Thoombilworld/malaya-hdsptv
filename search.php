@@ -44,8 +44,10 @@ $canonical = hs_base_url('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '
   <title><?= htmlspecialchars($page_title) ?></title>
   <meta name="description" content="<?= htmlspecialchars($meta_desc) ?>">
   <meta name="keywords" content="<?= htmlspecialchars($meta_keys) ?>">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
+  <?= hs_hreflang_links('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '')) ?>
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>

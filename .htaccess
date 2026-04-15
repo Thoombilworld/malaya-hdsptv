@@ -1,5 +1,6 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
-# You can expand rules if you add friendly URLs later.
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^robots\.txt$ robots.php [L]
 </IfModule>
 Options -Indexes

@@ -137,6 +137,34 @@ function hs_t($key) {
 
 hs_bootstrap_locale();
 
+function hs_url_without_lang($pathAndQuery = null) {
+    if ($pathAndQuery === null) {
+        $pathAndQuery = $_SERVER['REQUEST_URI'] ?? '/';
+    }
+    $parts = parse_url($pathAndQuery);
+    $path = $parts['path'] ?? '/';
+    $query = [];
+    if (!empty($parts['query'])) {
+        parse_str($parts['query'], $query);
+        unset($query['lang']);
+    }
+    $qs = http_build_query($query);
+    return $path . ($qs !== '' ? ('?' . $qs) : '');
+}
+
+function hs_hreflang_links($pathAndQuery = null) {
+    $basePath = hs_url_without_lang($pathAndQuery);
+    $separator = strpos($basePath, '?') !== false ? '&' : '?';
+    $links = [];
+    foreach (hs_available_locales() as $code => $label) {
+        $href = hs_base_url(ltrim($basePath, '/')) . $separator . 'lang=' . rawurlencode($code);
+        $links[] = '<link rel="alternate" hreflang="' . htmlspecialchars($code, ENT_QUOTES, 'UTF-8') . '" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
+    }
+    $xDefault = hs_base_url(ltrim($basePath, '/'));
+    $links[] = '<link rel="alternate" hreflang="x-default" href="' . htmlspecialchars($xDefault, ENT_QUOTES, 'UTF-8') . '">';
+    return implode("\n", $links);
+}
+
 function hs_base_url($path = '') {
     return HS_BASE_URL . ltrim($path, '/');
 }

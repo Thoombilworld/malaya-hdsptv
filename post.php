@@ -98,8 +98,10 @@ if (!empty($post['image_main'])) {
   <title><?= htmlspecialchars($page_title) ?></title>
   <meta name="description" content="<?= htmlspecialchars($meta_desc) ?>">
   <meta name="keywords" content="<?= htmlspecialchars($meta_keys) ?>">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
+  <?= hs_hreflang_links('post.php?slug=' . urlencode($post['slug'])) ?>
 
   <?php if ($og_image): ?>
     <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
