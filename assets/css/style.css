@@ -147,13 +147,17 @@ a:hover { color: var(--red); }
 .grid-12 {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 .col-8 { grid-column: span 8; }
 .col-4 { grid-column: span 4; }
 .main-home { align-items: start; }
-.stack-24 > * + * { margin-top: var(--space-3); }
-.stack-32 > * + * { margin-top: var(--space-4); }
+.stack-24, .stack-32 {
+  display: grid;
+  align-content: start;
+}
+.stack-24 { gap: var(--space-4); }
+.stack-32 { gap: var(--space-6); }
 
 .hero-card {
   border-radius: var(--radius-hero);
@@ -173,12 +177,21 @@ a:hover { color: var(--red); }
 .card-grid { display: grid; gap: var(--space-3); }
 .card-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .card-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.card-grid > * { height: 100%; }
 
 .news-card, .panel, .live-promo {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
+  min-height: 220px;
+}
+.col-4 .panel {
+  display: flex;
+  flex-direction: column;
+}
+.col-4 .list-clean {
+  flex: 1;
 }
 .news-card h3 { margin: 10px 0 8px; font-size: 22px; line-height: 1.25; }
 .news-card p { margin: 0 0 12px; color: #374151; font-size: 15px; }
@@ -224,6 +237,7 @@ a:hover { color: var(--red); }
   .container { width: min(var(--content-max), calc(100% - 64px)); }
   .col-md-12 { grid-column: span 12; }
   .card-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stack-32 { gap: var(--space-5); }
   .header-utils { order: 4; width: 100%; justify-content: space-between; }
   .search-inline input { width: 180px; }
 }
@@ -254,6 +268,8 @@ a:hover { color: var(--red); }
   .lang-form { flex: 1; }
   .lang-selector { flex: 1; min-width: 80px; }
   .install-app-btn { white-space: nowrap; }
+  .stack-24, .stack-32 { gap: var(--space-4); }
+  .news-card, .panel, .live-promo { min-height: 0; }
   .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
   .hero-media { height: 220px; }
   .hero-content { padding: 18px; }

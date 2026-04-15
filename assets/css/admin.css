@@ -3,7 +3,7 @@
 :root {
   --admin-max: 1280px;
   --sidebar-w: 272px;
-  --gutter: 24px;
+  --gutter: 32px;
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -103,7 +103,7 @@ body.admin-body {
 .admin-page {
   max-width: var(--admin-max);
   margin: 0 auto;
-  padding: var(--space-4) var(--space-3) var(--space-6);
+  padding: var(--space-5) var(--space-4) var(--space-6);
 }
 
 .grid-12 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gutter); }
@@ -118,6 +118,7 @@ body.admin-body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
+  min-height: 220px;
 }
 .card h2 { margin: 0 0 10px; font-size: 22px; }
 .card h3 { margin: 0 0 8px; font-size: 18px; }
@@ -229,6 +230,7 @@ body.admin-body {
   .auth-layout { grid-template-columns: 1fr; }
   .auth-panel { padding: 32px 24px; }
   .admin-topbar-inner, .admin-page { padding-inline: 16px; }
-  .grid-12 { gap: 16px; }
+  .grid-12 { gap: 24px; }
+  .card { min-height: 0; }
   .col-sm-12 { grid-column: span 12; }
 }
