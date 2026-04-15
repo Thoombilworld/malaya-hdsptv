@@ -34,8 +34,9 @@ function hs_admin_shell_start(string $title, string $pageTitle, string $active =
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/admin.css') ?>">
 </head>
 <body class="admin-body">
+<div class="admin-sidebar-overlay" data-admin-overlay></div>
 <div class="admin-shell">
-  <aside class="admin-sidebar" aria-label="Admin navigation">
+  <aside class="admin-sidebar" id="admin-sidebar" data-admin-sidebar aria-label="Admin navigation">
     <div class="admin-brand">
       <strong>HDSPTV Admin</strong>
       <small>International Newsroom Control</small>
@@ -50,6 +51,7 @@ function hs_admin_shell_start(string $title, string $pageTitle, string $active =
   <div class="admin-main">
     <header class="admin-topbar">
       <div class="admin-topbar-inner">
+        <button class="admin-menu-toggle" type="button" data-admin-menu-toggle aria-controls="admin-sidebar" aria-expanded="false">Menu</button>
         <div>
           <h1><?= htmlspecialchars($pageTitle) ?></h1>
           <div class="meta">Welcome, <?= htmlspecialchars($_SESSION['hs_admin_name'] ?? 'Admin') ?> · Editorial operations center</div>
@@ -69,6 +71,7 @@ function hs_admin_shell_end(): void {
     </main>
   </div>
 </div>
+<script defer src="<?= hs_base_url('assets/js/admin-shell.js') ?>"></script>
 </body>
 </html>
     <?php
