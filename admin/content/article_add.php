@@ -22,6 +22,9 @@ function hs_slugify_local($text) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Refresh and try again.';
+    } else {
     $title   = trim($_POST['title'] ?? '');
     $slug_in = trim($_POST['slug'] ?? '');
     $slug    = $slug_in !== '' ? $slug_in : hs_slugify_local($title);
@@ -83,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
+    }
 }
 ?>
 <!doctype html>
@@ -97,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <h1>Add Article</h1>
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
+    <?= hs_csrf_input() ?>
     <label>Title</label><br>
     <input type="text" name="title" style="width:100%;" required><br><br>
 

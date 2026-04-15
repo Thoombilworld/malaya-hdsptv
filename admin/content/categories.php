@@ -1,23 +1,29 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
 hs_require_admin();
+hs_require_permission('category.manage');
 $db = hs_db();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $slug = trim($_POST['slug'] ?? '');
-    $parent_id = (int)($_POST['parent_id'] ?? 0);
-    if ($name === '') {
-        $error = 'Name is required.';
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Refresh and try again.';
     } else {
-        if ($slug === '') {
-            $slug = strtolower(preg_replace('/[^a-z0-9]+/i','-',$name));
-        }
-        $stmt = mysqli_prepare($db, "INSERT INTO hs_categories (name, slug, parent_id) VALUES (?,?,?)");
-        mysqli_stmt_bind_param($stmt, 'ssi', $name, $slug, $parent_id);
-        if (!mysqli_stmt_execute($stmt)) {
-            $error = 'Error saving category: ' . mysqli_error($db);
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        $parent_id = (int)($_POST['parent_id'] ?? 0);
+
+        if ($name === '') {
+            $error = 'Name is required.';
+        } else {
+            if ($slug === '') {
+                $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $name));
+            }
+            $stmt = mysqli_prepare($db, "INSERT INTO hs_categories (name, slug, parent_id) VALUES (?,?,?)");
+            mysqli_stmt_bind_param($stmt, 'ssi', $name, $slug, $parent_id);
+            if (!mysqli_stmt_execute($stmt)) {
+                $error = 'Error saving category: ' . mysqli_error($db);
+            }
         }
     }
 }
@@ -50,6 +56,7 @@ foreach ($categories as $c) $byId[$c['id']] = $c;
 
   <h2>Add Category</h2>
   <form method="post">
+    <?= hs_csrf_input() ?>
     <label>Name</label><br>
     <input type="text" name="name" style="width:100%;" required><br><br>
     <label>Slug (optional)</label><br>
@@ -68,9 +75,7 @@ foreach ($categories as $c) $byId[$c['id']] = $c;
   <table border="1" cellpadding="4" cellspacing="0" width="100%">
     <tr><th>ID</th><th>Name</th><th>Slug</th><th>Parent</th><th>Actions</th></tr>
     <?php foreach ($categories as $c): ?>
-      <?php
-        $parentName = $c['parent_id'] && isset($byId[$c['parent_id']]) ? $byId[$c['parent_id']]['name'] : '—';
-      ?>
+      <?php $parentName = $c['parent_id'] && isset($byId[$c['parent_id']]) ? $byId[$c['parent_id']]['name'] : '—'; ?>
       <tr>
         <td><?= (int)$c['id'] ?></td>
         <td><?= htmlspecialchars($c['name']) ?></td>

@@ -1,17 +1,22 @@
 <?php
 require __DIR__ . '/../../bootstrap.php';
 hs_require_admin();
+hs_require_permission('tag.manage');
 $db = hs_db();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    if ($name !== '') {
-        $slug = strtolower(preg_replace('/[^a-z0-9]+/i','-',$name));
-        $stmt = mysqli_prepare($db, "INSERT INTO hs_tags (name, slug) VALUES (?,?) ON DUPLICATE KEY UPDATE name=VALUES(name)");
-        mysqli_stmt_bind_param($stmt, 'ss', $name, $slug);
-        if (!mysqli_stmt_execute($stmt)) {
-            $error = 'Error saving tag: ' . mysqli_error($db);
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Refresh and try again.';
+    } else {
+        $name = trim($_POST['name'] ?? '');
+        if ($name !== '') {
+            $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $name));
+            $stmt = mysqli_prepare($db, "INSERT INTO hs_tags (name, slug) VALUES (?,?) ON DUPLICATE KEY UPDATE name=VALUES(name)");
+            mysqli_stmt_bind_param($stmt, 'ss', $name, $slug);
+            if (!mysqli_stmt_execute($stmt)) {
+                $error = 'Error saving tag: ' . mysqli_error($db);
+            }
         }
     }
 }
@@ -31,7 +36,9 @@ $has_tags = $res && mysqli_num_rows($res) > 0;
 $tags = [];
 if ($has_tags) {
     $tr = mysqli_query($db, "SELECT * FROM hs_tags ORDER BY name ASC");
-    if ($tr) { $tags = mysqli_fetch_all($tr, MYSQLI_ASSOC); }
+    if ($tr) {
+        $tags = mysqli_fetch_all($tr, MYSQLI_ASSOC);
+    }
 }
 ?>
 <!doctype html>
@@ -48,6 +55,7 @@ if ($has_tags) {
 
   <h2>Add Tag</h2>
   <form method="post">
+    <?= hs_csrf_input() ?>
     <label>Name</label><br>
     <input type="text" name="name" style="width:100%;" required><br><br>
     <button type="submit">Save Tag</button>

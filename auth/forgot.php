@@ -1,7 +1,11 @@
 <?php
 require __DIR__ . '/../bootstrap.php';
 $msg = '';
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Please refresh and try again.';
+    } else {
     $email = trim($_POST['email'] ?? '');
     if ($email !== '') {
         $token = bin2hex(random_bytes(16));
@@ -9,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_bind_param($stmt, 'ss', $email, $token);
         mysqli_stmt_execute($stmt);
         $msg = 'If the email exists, a reset token was generated. (SMTP integration needed to send link.)';
+    }
     }
 }
 ?>
@@ -21,8 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body style="max-width:480px;margin:40px auto;padding:0 16px;">
   <h1>Forgot Password</h1>
+  <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if ($msg): ?><div><?= htmlspecialchars($msg) ?></div><?php endif; ?>
   <form method="post">
+    <?= hs_csrf_input() ?>
     <label>Email</label><br>
     <input type="email" name="email" style="width:100%;" required><br><br>
     <button type="submit">Generate Reset Token</button>

@@ -4,6 +4,9 @@ $token = $_GET['token'] ?? '';
 $error = '';
 $msg   = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Please refresh and try again.';
+    } else {
     $token = $_POST['token'] ?? '';
     $pass  = $_POST['password'] ?? '';
     $pass2 = $_POST['password_confirm'] ?? '';
@@ -26,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Invalid or expired token.';
         }
     }
+    }
 }
 ?>
 <!doctype html>
@@ -40,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if ($msg): ?><div><?= htmlspecialchars($msg) ?></div><?php endif; ?>
   <form method="post">
+    <?= hs_csrf_input() ?>
     <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
     <label>New Password</label><br>
     <input type="password" name="password" style="width:100%;" required><br><br>

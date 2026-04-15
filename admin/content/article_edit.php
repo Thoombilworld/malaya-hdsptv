@@ -37,6 +37,9 @@ if ($tr) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hs_csrf_validate()) {
+        $error = 'Invalid form session. Refresh and try again.';
+    } else {
     $title   = trim($_POST['title'] ?? '');
     $slug_in = trim($_POST['slug'] ?? '');
     $slug    = $slug_in !== '' ? $slug_in : hs_slugify_local($title);
@@ -112,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $post['is_trending'] = $is_trending;
     $post['status'] = $status;
     $tags_str = $tags_raw;
+    }
 }
 ?>
 <!doctype html>
@@ -126,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <h1>Edit Article</h1>
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <form method="post" enctype="multipart/form-data">
+    <?= hs_csrf_input() ?>
     <label>Title</label><br>
     <input type="text" name="title" style="width:100%;" required value="<?= htmlspecialchars($post['title']) ?>"><br><br>
 
