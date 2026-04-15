@@ -68,7 +68,7 @@
       <a href="<?= hs_base_url('category.php?slug=gcc') ?>">GCC</a>
       <a href="<?= hs_base_url('category.php?slug=world') ?>">World</a>
       <a href="<?= hs_base_url('category.php?slug=sports') ?>">Sports</a>
-      <a class="live-btn" href="#">Live TV</a>
+      <a class="live-btn" href="<?= hs_base_url('live.php') ?>">Live TV</a>
     </nav>
 
     <form class="search-inline" method="get" action="<?= hs_base_url('search.php') ?>">
@@ -159,13 +159,13 @@
       <section class="live-promo">
         <h2>Watch HDSPTV Live</h2>
         <p>Follow live programs, breaking updates, and rolling coverage from our international desk.</p>
-        <a class="btn btn-primary" href="#">Open Live TV</a>
+        <a class="btn btn-primary" href="<?= hs_base_url('live.php') ?>">Open Live TV</a>
       </section>
     </section>
 
     <aside class="col-4 col-md-12 stack-24">
       <section class="panel">
-        <div class="section-head"><h2>Trending Now</h2></div>
+        <div class="section-head"><h2><a href="<?= hs_base_url('trending.php') ?>">Trending Now</a></h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeTrending, 0, 6) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a><div class="meta"><?= $formatDate($item) ?></div></li>
@@ -183,7 +183,7 @@
       </section>
 
       <section class="panel">
-        <div class="section-head"><h2>Video News</h2></div>
+        <div class="section-head"><h2><a href="<?= hs_base_url('video.php') ?>">Video News</a></h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeVideos, 0, 4) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></li>
@@ -209,7 +209,7 @@
       <strong><?= htmlspecialchars($settings['site_title'] ?? 'HDSPTV') ?></strong>
       <p class="meta"><?= htmlspecialchars($settings['tagline'] ?? 'International newsroom coverage across India, GCC, Kerala and beyond.') ?></p>
     </div>
-    <div class="footer-links"><a href="#">About</a><a href="#">Contact</a><a href="#">Privacy</a></div>
+    <div class="footer-links"><a href="<?= hs_base_url('about.php') ?>">About</a><a href="<?= hs_base_url('contact.php') ?>">Contact</a><a href="<?= hs_base_url('profile.php') ?>">Profile</a></div>
   </div>
 </footer>
 </body>
