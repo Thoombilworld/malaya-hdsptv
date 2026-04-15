@@ -84,6 +84,9 @@ if (!empty($tags)) {
 }
 $categoryName = $post['category_name'] ?: 'News';
 $canonical = hs_post_url($post['slug']);
+$shareCanonical = $canonical . (strpos($canonical, '?') !== false ? '&' : '?') . 'lang=' . rawurlencode(hs_locale());
+$shareTitle = $post['title'] . ' - ' . $site_title;
+$ogLocale = hs_locale_to_og();
 
 $og_image = '';
 if (!empty($post['image_main'])) {
@@ -112,9 +115,17 @@ if (!empty($post['image_main'])) {
   <meta property="og:description" content="<?= htmlspecialchars($meta_desc) ?>">
   <meta property="og:type" content="article">
   <meta property="og:url" content="<?= htmlspecialchars($canonical) ?>">
+  <meta property="og:site_name" content="<?= htmlspecialchars($site_title) ?>">
+  <meta property="og:locale" content="<?= htmlspecialchars($ogLocale) ?>">
+  <?php foreach (array_keys(hs_available_locales()) as $altLocale): ?>
+    <?php if ($altLocale !== hs_locale()): ?>
+      <meta property="og:locale:alternate" content="<?= htmlspecialchars(hs_locale_to_og($altLocale)) ?>">
+    <?php endif; ?>
+  <?php endforeach; ?>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="<?= htmlspecialchars($post['title']) ?>">
   <meta name="twitter:description" content="<?= htmlspecialchars($meta_desc) ?>">
+  <meta name="twitter:url" content="<?= htmlspecialchars($canonical) ?>">
 
   <?php if (!empty($settings['seo_schema_enabled']) && $settings['seo_schema_enabled'] === '1'): ?>
   <script type="application/ld+json">
@@ -168,6 +179,7 @@ if (!empty($post['image_main'])) {
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
+  <script defer src="<?= hs_base_url('assets/js/social-share.js') ?>"></script>
 
   <style>
     :root {
@@ -352,15 +364,33 @@ if (!empty($post['image_main'])) {
       font-size:12px;
       color:var(--hs-text-muted);
     }
-    .share-links a {
+    .share-links {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+    .share-links a,
+    .share-links button {
       display:inline-block;
-      margin-right:8px;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid #E5E7EB;
       font-size:11px;
       color:#111827;
       background:#FFFFFF;
+      cursor:pointer;
+    }
+    .share-links button:hover,
+    .share-links a:hover {
+      border-color:#CBD5E1;
+      color:#0B1220;
+    }
+    .share-feedback {
+      min-height:18px;
+      margin-top:6px;
+      font-size:11px;
+      color:#475569;
     }
 
     .related-block {
@@ -570,16 +600,17 @@ if (!empty($post['image_main'])) {
 
         <div class="share-block">
           <div>Share this article</div>
-          <?php
-            $shareUrl = urlencode($canonical);
-            $shareText = urlencode($post['title'] . ' - ' . $site_title);
-          ?>
           <div class="share-links">
-            <a href="https://api.whatsapp.com/send?text=<?= $shareText ?>%20<?= $shareUrl ?>" target="_blank">WhatsApp</a>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank">Facebook</a>
-            <a href="https://twitter.com/intent/tweet?url=<?= $shareUrl ?>&text=<?= $shareText ?>" target="_blank">X</a>
-            <a href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareText ?>" target="_blank">Telegram</a>
+            <a href="<?= htmlspecialchars(hs_social_share_url($shareCanonical, $shareTitle, 'whatsapp')) ?>" target="_blank" rel="noopener">WhatsApp</a>
+            <a href="<?= htmlspecialchars(hs_social_share_url($shareCanonical, $shareTitle, 'facebook')) ?>" target="_blank" rel="noopener">Facebook</a>
+            <a href="<?= htmlspecialchars(hs_social_share_url($shareCanonical, $shareTitle, 'x')) ?>" target="_blank" rel="noopener">X</a>
+            <a href="<?= htmlspecialchars(hs_social_share_url($shareCanonical, $shareTitle, 'linkedin')) ?>" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="<?= htmlspecialchars(hs_social_share_url($shareCanonical, $shareTitle, 'telegram')) ?>" target="_blank" rel="noopener">Telegram</a>
+            <a href="<?= htmlspecialchars(hs_social_share_url($shareCanonical, $shareTitle, 'email')) ?>">Email</a>
+            <button type="button" class="share-native-btn" data-native-share data-share-url="<?= htmlspecialchars($shareCanonical) ?>" data-share-title="<?= htmlspecialchars($shareTitle) ?>" data-share-text="<?= htmlspecialchars($meta_desc) ?>">Share</button>
+            <button type="button" class="share-copy-btn" data-copy-share-url="<?= htmlspecialchars($shareCanonical) ?>">Copy Link</button>
           </div>
+          <div class="share-feedback" data-share-feedback aria-live="polite"></div>
         </div>
 
         <?php if (!empty($related)): ?>

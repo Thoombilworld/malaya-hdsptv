@@ -13,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       'social_telegram',
       'social_threads',
       'social_linkedin',
+      'social_auto_enabled',
+      'social_distribution_webhook',
     ];
     $db = hs_db();
     foreach ($keys as $k) {
@@ -35,6 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body style="max-width:800px;margin:20px auto;padding:0 16px;">
   <h1>Social Media Links</h1>
   <?php if ($msg): ?><div style="color:green;"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+  <p style="font-size:12px;color:#555;">Optional distribution tool: configure a webhook and trigger article dispatches from the social dispatcher.</p>
+  <p><a href="<?= hs_base_url('admin/social_dispatch.php') ?>">Open Social Dispatcher</a></p>
   <form method="post">
     <?php
       $fields = [
@@ -52,6 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label><?= $label ?> URL</label><br>
       <input type="text" name="<?= $key ?>" style="width:100%;" value="<?= htmlspecialchars($settings[$key] ?? '') ?>"><br><br>
     <?php endforeach; ?>
+    <label><input type="checkbox" name="social_auto_enabled" value="1" <?= !empty($settings['social_auto_enabled']) ? 'checked' : '' ?>> Enable automated social distribution</label><br><br>
+    <label>Distribution Webhook URL</label><br>
+    <input type="url" name="social_distribution_webhook" style="width:100%;" value="<?= htmlspecialchars($settings['social_distribution_webhook'] ?? '') ?>" placeholder="https://your-automation.example/webhook"><br><br>
     <button type="submit">Save Links</button>
   </form>
 </body>

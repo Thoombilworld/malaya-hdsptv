@@ -216,6 +216,31 @@ function hs_auto_meta($type, array $payload, array $settings = []) {
     return ['title' => $site, 'desc' => $descDefault, 'keywords' => (string)($settings['seo_meta_keywords'] ?? '')];
 }
 
+function hs_locale_to_og($locale = null) {
+    $locale = $locale ?: hs_locale();
+    $map = [
+        'en' => 'en_US',
+        'ml' => 'ml_IN',
+        'hi' => 'hi_IN',
+        'ar' => 'ar_AR',
+    ];
+    return $map[$locale] ?? 'en_US';
+}
+
+function hs_social_share_url($url, $title, $platform) {
+    $u = rawurlencode($url);
+    $t = rawurlencode($title);
+    switch ($platform) {
+        case 'facebook': return "https://www.facebook.com/sharer/sharer.php?u={$u}";
+        case 'whatsapp': return "https://api.whatsapp.com/send?text={$t}%20{$u}";
+        case 'x': return "https://twitter.com/intent/tweet?url={$u}&text={$t}";
+        case 'linkedin': return "https://www.linkedin.com/sharing/share-offsite/?url={$u}";
+        case 'telegram': return "https://t.me/share/url?url={$u}&text={$t}";
+        case 'email': return "mailto:?subject={$t}&body={$u}";
+        default: return $url;
+    }
+}
+
 function hs_view($view, $data = []) {
     extract($data);
     include __DIR__ . '/app/Views/' . $view . '.php';
