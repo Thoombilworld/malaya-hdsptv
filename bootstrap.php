@@ -2,6 +2,141 @@
 session_start();
 require __DIR__ . '/config/config.php';
 
+function hs_available_locales() {
+    return [
+        'en' => 'English',
+        'ml' => 'മലയാളം',
+        'ar' => 'العربية',
+        'hi' => 'हिन्दी',
+    ];
+}
+
+function hs_country_locale_map() {
+    return [
+        'IN' => 'hi',
+        'AE' => 'ar', 'SA' => 'ar', 'QA' => 'ar', 'KW' => 'ar', 'OM' => 'ar', 'BH' => 'ar',
+        'EG' => 'ar', 'JO' => 'ar', 'IQ' => 'ar', 'LB' => 'ar', 'MA' => 'ar', 'DZ' => 'ar',
+        'US' => 'en', 'GB' => 'en', 'CA' => 'en', 'AU' => 'en', 'NZ' => 'en',
+    ];
+}
+
+function hs_set_locale($locale) {
+    $_SESSION['hs_locale'] = $locale;
+    setcookie('hs_locale', $locale, time() + (86400 * 180), '/');
+}
+
+function hs_detect_accept_language() {
+    $header = strtolower(trim($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''));
+    if ($header === '') {
+        return null;
+    }
+    $supported = hs_available_locales();
+    foreach (explode(',', $header) as $chunk) {
+        $chunk = trim(explode(';', $chunk)[0] ?? '');
+        if ($chunk === '') {
+            continue;
+        }
+        $primary = substr($chunk, 0, 2);
+        if (isset($supported[$primary])) {
+            return $primary;
+        }
+    }
+    return null;
+}
+
+function hs_detect_country_locale() {
+    $country = strtoupper(trim($_SERVER['HTTP_CF_IPCOUNTRY'] ?? ($_SERVER['GEOIP_COUNTRY_CODE'] ?? '')));
+    if ($country === '') {
+        return null;
+    }
+    $map = hs_country_locale_map();
+    return $map[$country] ?? null;
+}
+
+function hs_bootstrap_locale() {
+    $supported = hs_available_locales();
+    $requested = strtolower(trim($_GET['lang'] ?? ''));
+    if ($requested !== '' && isset($supported[$requested])) {
+        hs_set_locale($requested);
+        return $requested;
+    }
+
+    $cookie = strtolower(trim($_COOKIE['hs_locale'] ?? ''));
+    if ($cookie !== '' && isset($supported[$cookie])) {
+        $_SESSION['hs_locale'] = $cookie;
+        return $cookie;
+    }
+
+    $session = strtolower(trim($_SESSION['hs_locale'] ?? ''));
+    if ($session !== '' && isset($supported[$session])) {
+        return $session;
+    }
+
+    $countryLocale = hs_detect_country_locale();
+    if ($countryLocale && isset($supported[$countryLocale])) {
+        hs_set_locale($countryLocale);
+        return $countryLocale;
+    }
+
+    $acceptLocale = hs_detect_accept_language();
+    if ($acceptLocale && isset($supported[$acceptLocale])) {
+        hs_set_locale($acceptLocale);
+        return $acceptLocale;
+    }
+
+    hs_set_locale('en');
+    return 'en';
+}
+
+function hs_locale() {
+    return $_SESSION['hs_locale'] ?? 'en';
+}
+
+function hs_is_rtl() {
+    return hs_locale() === 'ar';
+}
+
+function hs_t($key) {
+    $dict = [
+        'en' => [
+            'international_news_network' => 'International News Network',
+            'global_edition' => 'Global Edition',
+            'live_desk_active' => 'Live Desk Active',
+            'home' => 'Home', 'india' => 'India', 'gcc' => 'GCC', 'world' => 'World', 'sports' => 'Sports',
+            'live_tv' => 'Live TV', 'search_stories' => 'Search stories', 'login' => 'Login', 'register' => 'Register',
+            'install_app' => 'Install App',
+        ],
+        'ml' => [
+            'international_news_network' => 'അന്താരാഷ്ട്ര വാർത്താ നെറ്റ്വർക്ക്',
+            'global_edition' => 'ഗ്ലോബൽ എഡിഷൻ',
+            'live_desk_active' => 'ലൈവ് ഡെസ്ക് സജീവമാണ്',
+            'home' => 'ഹോം', 'india' => 'ഇന്ത്യ', 'gcc' => 'ജിസിസി', 'world' => 'ലോകം', 'sports' => 'കായികം',
+            'live_tv' => 'ലൈവ് ടിവി', 'search_stories' => 'വാർത്തകൾ തിരയുക', 'login' => 'ലോഗിൻ', 'register' => 'രജിസ്റ്റർ',
+            'install_app' => 'ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക',
+        ],
+        'ar' => [
+            'international_news_network' => 'شبكة أخبار دولية',
+            'global_edition' => 'النسخة العالمية',
+            'live_desk_active' => 'مكتب البث المباشر نشط',
+            'home' => 'الرئيسية', 'india' => 'الهند', 'gcc' => 'الخليج', 'world' => 'العالم', 'sports' => 'الرياضة',
+            'live_tv' => 'البث المباشر', 'search_stories' => 'ابحث في الأخبار', 'login' => 'تسجيل الدخول', 'register' => 'إنشاء حساب',
+            'install_app' => 'تثبيت التطبيق',
+        ],
+        'hi' => [
+            'international_news_network' => 'अंतरराष्ट्रीय समाचार नेटवर्क',
+            'global_edition' => 'ग्लोबल एडिशन',
+            'live_desk_active' => 'लाइव डेस्क सक्रिय',
+            'home' => 'होम', 'india' => 'भारत', 'gcc' => 'जीसीसी', 'world' => 'विश्व', 'sports' => 'खेल',
+            'live_tv' => 'लाइव टीवी', 'search_stories' => 'समाचार खोजें', 'login' => 'लॉगिन', 'register' => 'रजिस्टर',
+            'install_app' => 'ऐप इंस्टॉल करें',
+        ],
+    ];
+    $locale = hs_locale();
+    return $dict[$locale][$key] ?? $dict['en'][$key] ?? $key;
+}
+
+hs_bootstrap_locale();
+
 function hs_base_url($path = '') {
     return HS_BASE_URL . ltrim($path, '/');
 }

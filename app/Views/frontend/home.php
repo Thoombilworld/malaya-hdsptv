@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="<?= htmlspecialchars(hs_locale(), ENT_QUOTES, 'UTF-8') ?>" dir="<?= hs_is_rtl() ? 'rtl' : 'ltr' ?>">
 <head>
   <meta charset="utf-8">
   <title><?= htmlspecialchars($settings['site_title'] ?? 'NEWS HDSPTV') ?></title>
@@ -48,9 +48,9 @@
   <div class="container top-strip-inner">
     <span><?= date('l, F j, Y') ?></span>
     <span class="divider-dot">•</span>
-    <span>Global Edition</span>
+    <span><?= htmlspecialchars(hs_t('global_edition')) ?></span>
     <span class="divider-dot">•</span>
-    <span>Live Desk Active</span>
+    <span><?= htmlspecialchars(hs_t('live_desk_active')) ?></span>
   </div>
 </div>
 
@@ -60,29 +60,36 @@
       <span class="brand-mark">H</span>
       <span>
         <strong><?= htmlspecialchars($settings['site_title'] ?? 'HDSPTV') ?></strong>
-        <small>International News Network</small>
+        <small><?= htmlspecialchars(hs_t('international_news_network')) ?></small>
       </span>
     </a>
     <button class="mobile-menu-btn" data-nav-toggle aria-controls="top-nav" aria-expanded="false">Menu</button>
 
     <nav class="top-nav" id="top-nav" data-top-nav aria-label="Main navigation">
-      <a href="<?= hs_base_url('/') ?>">Home</a>
-      <a href="<?= hs_base_url('category.php?slug=india') ?>">India</a>
-      <a href="<?= hs_base_url('category.php?slug=gcc') ?>">GCC</a>
-      <a href="<?= hs_base_url('category.php?slug=world') ?>">World</a>
-      <a href="<?= hs_base_url('category.php?slug=sports') ?>">Sports</a>
-      <a class="live-btn" href="<?= hs_base_url('live.php') ?>">Live TV</a>
+      <a href="<?= hs_base_url('/') ?>"><?= htmlspecialchars(hs_t('home')) ?></a>
+      <a href="<?= hs_base_url('category.php?slug=india') ?>"><?= htmlspecialchars(hs_t('india')) ?></a>
+      <a href="<?= hs_base_url('category.php?slug=gcc') ?>"><?= htmlspecialchars(hs_t('gcc')) ?></a>
+      <a href="<?= hs_base_url('category.php?slug=world') ?>"><?= htmlspecialchars(hs_t('world')) ?></a>
+      <a href="<?= hs_base_url('category.php?slug=sports') ?>"><?= htmlspecialchars(hs_t('sports')) ?></a>
+      <a class="live-btn" href="<?= hs_base_url('live.php') ?>"><?= htmlspecialchars(hs_t('live_tv')) ?></a>
     </nav>
 
     <form class="search-inline" method="get" action="<?= hs_base_url('search.php') ?>">
-      <input type="text" name="q" placeholder="Search stories" aria-label="Search stories">
+      <input type="text" name="q" placeholder="<?= htmlspecialchars(hs_t('search_stories')) ?>" aria-label="<?= htmlspecialchars(hs_t('search_stories')) ?>">
     </form>
 
     <div class="header-utils">
-      <button class="install-app-btn" data-install-app hidden>Install App</button>
-      <select aria-label="Language selector" class="lang-selector"><option>EN</option><option>ML</option><option>AR</option></select>
-      <a href="<?= hs_base_url('auth/login.php') ?>">Login</a>
-      <a href="<?= hs_base_url('auth/register.php') ?>">Register</a>
+      <button class="install-app-btn" data-install-app hidden><?= htmlspecialchars(hs_t('install_app')) ?></button>
+      <form method="get" class="lang-form" action="<?= hs_base_url('/') ?>">
+        <label class="sr-only" for="language-picker">Language</label>
+        <select id="language-picker" name="lang" aria-label="Language selector" class="lang-selector" onchange="this.form.submit()">
+          <?php foreach (hs_available_locales() as $code => $label): ?>
+            <option value="<?= htmlspecialchars($code) ?>" <?= hs_locale() === $code ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </form>
+      <a href="<?= hs_base_url('auth/login.php') ?>"><?= htmlspecialchars(hs_t('login')) ?></a>
+      <a href="<?= hs_base_url('auth/register.php') ?>"><?= htmlspecialchars(hs_t('register')) ?></a>
     </div>
   </div>
 </header>
