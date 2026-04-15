@@ -239,6 +239,19 @@ body.admin-body {
   font-size: 12px;
   font-weight: 700;
 }
+.log-context {
+  margin: 0;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #F8FAFC;
+  max-width: 380px;
+  max-height: 140px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
 
 @media (max-width: 1100px) {
   .admin-sidebar {
