@@ -10,6 +10,7 @@ hs_require_admin();
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
 </head>
 <body style="max-width:900px;margin:20px auto;padding:0 16px;">
+  <p style="margin:0 0 12px;"><a href="<?= hs_base_url('admin/index.php') ?>">← Back to Admin Dashboard</a></p>
   <h1>System Logs (Placeholder)</h1>
   <p>This page is a placeholder for integrating error logs or custom activity logs.</p>
   <p>For now, check your server's PHP error log in cPanel.</p>

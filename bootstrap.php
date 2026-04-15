@@ -4,6 +4,18 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+if (!function_exists('hs_is_admin_request')) {
+    function hs_is_admin_request() {
+        $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+        return strpos($script, '/admin/') !== false;
+    }
+}
+
+if (hs_is_admin_request() && (!defined('HS_INSTALLED') || !HS_INSTALLED)) {
+    header('Location: ' . rtrim(HS_BASE_URL, '/') . '/install/index.php');
+    exit;
+}
+
 function hs_available_locales() {
     return [
         'en' => 'English',
@@ -461,6 +473,10 @@ function hs_is_admin_logged_in() {
     return !empty($_SESSION['hs_admin_id']);
 }
 function hs_require_admin() {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db()) {
+        header('Location: ' . hs_base_url('install/index.php'));
+        exit;
+    }
     if (!hs_is_admin_logged_in()) {
         header('Location: ' . hs_base_url('admin/login.php'));
         exit;
@@ -469,6 +485,7 @@ function hs_require_admin() {
 
 // Frontend user helpers
 function hs_current_user() {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db()) return null;
     if (empty($_SESSION['hs_user_id'])) return null;
     $id = (int) $_SESSION['hs_user_id'];
     $res = mysqli_query(hs_db(), "SELECT id, name, email, is_premium FROM hs_frontend_users WHERE id = " . $id . " LIMIT 1");

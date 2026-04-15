@@ -51,6 +51,7 @@ foreach ($categories as $c) $byId[$c['id']] = $c;
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
 </head>
 <body style="max-width:900px;margin:20px auto;padding:0 16px;">
+  <p style="margin:0 0 12px;"><a href="<?= hs_base_url('admin/index.php') ?>">← Back to Admin Dashboard</a></p>
   <h1>Categories (Parent + Sub)</h1>
   <?php if ($error): ?><div style="color:red;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
