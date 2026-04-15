@@ -5,7 +5,7 @@ require __DIR__ . '/bootstrap.php';
 $settings = hs_settings();
 $db = hs_db();
 
-$q = trim($_GET['q'] ?? '');
+$q = urldecode(trim($_GET['q'] ?? ''));
 $posts = [];
 
 if ($q !== '') {
@@ -32,10 +32,11 @@ function hs_post_date_local($p) {
 }
 
 $site_title = $settings['site_title'] ?? 'NEWS HDSPTV';
-$page_title = ($q !== '' ? ('Search: ' . $q . ' – ') : 'Search – ') . $site_title;
-$meta_desc = $settings['seo_meta_description'] ?? '';
-$meta_keys = $settings['seo_meta_keywords'] ?? '';
-$canonical = hs_base_url('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : ''));
+$meta = hs_auto_meta('search', ['query' => $q], $settings);
+$page_title = $meta['title'];
+$meta_desc = $meta['desc'];
+$meta_keys = $meta['keywords'];
+$canonical = hs_search_url($q);
 ?>
 <!doctype html>
 <html lang="en">
@@ -47,7 +48,7 @@ $canonical = hs_base_url('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
-  <?= hs_hreflang_links('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '')) ?>
+  <?= hs_hreflang_links($q !== '' ? ('search/' . rawurlencode($q)) : 'search') ?>
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
   <?= hs_pwa_head_tags() ?>
   <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
@@ -289,23 +290,23 @@ $canonical = hs_base_url('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '
   </div>
   <nav class="nav-main">
     <a href="<?= hs_base_url('index.php#top') ?>">Home</a>
-    <a href="<?= hs_base_url('category.php?slug=india') ?>">India</a>
-    <a href="<?= hs_base_url('category.php?slug=gcc') ?>">GCC</a>
-    <a href="<?= hs_base_url('category.php?slug=kerala') ?>">Kerala</a>
-    <a href="<?= hs_base_url('category.php?slug=world') ?>">World</a>
-    <a href="<?= hs_base_url('category.php?slug=sports') ?>">Sports</a>
-    <a href="<?= hs_base_url('category.php?slug=entertainment') ?>">Entertainment</a>
-    <a href="<?= hs_base_url('category.php?slug=business') ?>">Business</a>
-    <a href="<?= hs_base_url('category.php?slug=technology') ?>">Technology</a>
-    <a href="<?= hs_base_url('category.php?slug=lifestyle') ?>">Lifestyle</a>
-    <a href="<?= hs_base_url('category.php?slug=health') ?>">Health</a>
-    <a href="<?= hs_base_url('category.php?slug=travel') ?>">Travel</a>
-    <a href="<?= hs_base_url('category.php?slug=auto') ?>">Auto</a>
-    <a href="<?= hs_base_url('category.php?slug=opinion') ?>">Opinion</a>
-    <a href="<?= hs_base_url('category.php?slug=politics') ?>">Politics</a>
-    <a href="<?= hs_base_url('category.php?slug=crime') ?>">Crime</a>
-    <a href="<?= hs_base_url('category.php?slug=education') ?>">Education</a>
-    <a href="<?= hs_base_url('category.php?slug=religion') ?>">Religion</a>
+    <a href="<?= hs_category_url('india') ?>">India</a>
+    <a href="<?= hs_category_url('gcc') ?>">GCC</a>
+    <a href="<?= hs_category_url('kerala') ?>">Kerala</a>
+    <a href="<?= hs_category_url('world') ?>">World</a>
+    <a href="<?= hs_category_url('sports') ?>">Sports</a>
+    <a href="<?= hs_category_url('entertainment') ?>">Entertainment</a>
+    <a href="<?= hs_category_url('business') ?>">Business</a>
+    <a href="<?= hs_category_url('technology') ?>">Technology</a>
+    <a href="<?= hs_category_url('lifestyle') ?>">Lifestyle</a>
+    <a href="<?= hs_category_url('health') ?>">Health</a>
+    <a href="<?= hs_category_url('travel') ?>">Travel</a>
+    <a href="<?= hs_category_url('auto') ?>">Auto</a>
+    <a href="<?= hs_category_url('opinion') ?>">Opinion</a>
+    <a href="<?= hs_category_url('politics') ?>">Politics</a>
+    <a href="<?= hs_category_url('crime') ?>">Crime</a>
+    <a href="<?= hs_category_url('education') ?>">Education</a>
+    <a href="<?= hs_category_url('religion') ?>">Religion</a>
   </nav>
   <form class="nav-search" action="<?= hs_base_url('search.php') ?>" method="get">
     <input type="text" name="q" placeholder="Search news..." value="<?= htmlspecialchars($q) ?>">
@@ -354,7 +355,7 @@ $canonical = hs_base_url('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '
                 <?php endif; ?>
               </div>
               <div class="result-title">
-                <a href="<?= hs_base_url('post.php?slug=' . urlencode($p['slug'])) ?>"><?= htmlspecialchars($p['title']) ?></a>
+                <a href="<?= hs_post_url($p['slug']) ?>"><?= htmlspecialchars($p['title']) ?></a>
               </div>
               <div class="result-meta">
                 <?= hs_post_date_local($p) ?>

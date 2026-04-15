@@ -169,6 +169,53 @@ function hs_base_url($path = '') {
     return HS_BASE_URL . ltrim($path, '/');
 }
 
+function hs_post_url($slug) {
+    return hs_base_url('post/' . rawurlencode((string)$slug));
+}
+
+function hs_category_url($slug) {
+    return hs_base_url('category/' . rawurlencode((string)$slug));
+}
+
+function hs_tag_url($slug) {
+    return hs_base_url('tag/' . rawurlencode((string)$slug));
+}
+
+function hs_search_url($query = '') {
+    $query = trim((string)$query);
+    if ($query === '') {
+        return hs_base_url('search');
+    }
+    return hs_base_url('search/' . rawurlencode($query));
+}
+
+function hs_auto_meta($type, array $payload, array $settings = []) {
+    $site = $settings['site_title'] ?? HS_APP_NAME;
+    $descDefault = $settings['seo_meta_description'] ?? ($settings['tagline'] ?? '');
+    if ($type === 'post') {
+        $title = trim(($payload['title'] ?? '') . ' | ' . $site);
+        $desc = trim((string)($payload['excerpt'] ?? $descDefault));
+        $keywords = trim((string)($settings['seo_meta_keywords'] ?? ''));
+        return compact('title', 'desc', 'keywords');
+    }
+    if ($type === 'taxonomy') {
+        $name = (string)($payload['name'] ?? 'News');
+        $title = trim($name . ' | ' . $site);
+        $desc = trim(($payload['description'] ?? '') ?: ($name . ' updates and breaking coverage from ' . $site));
+        $keywords = trim(($settings['seo_meta_keywords'] ?? '') . ', ' . $name, ', ');
+        return compact('title', 'desc', 'keywords');
+    }
+    if ($type === 'search') {
+        $q = trim((string)($payload['query'] ?? ''));
+        $prefix = $q !== '' ? ('Search: ' . $q) : 'Search';
+        $title = $prefix . ' | ' . $site;
+        $desc = $q !== '' ? ('Latest results for ' . $q . ' on ' . $site) : $descDefault;
+        $keywords = trim((string)($settings['seo_meta_keywords'] ?? ''));
+        return compact('title', 'desc', 'keywords');
+    }
+    return ['title' => $site, 'desc' => $descDefault, 'keywords' => (string)($settings['seo_meta_keywords'] ?? '')];
+}
+
 function hs_view($view, $data = []) {
     extract($data);
     include __DIR__ . '/app/Views/' . $view . '.php';

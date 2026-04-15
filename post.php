@@ -74,15 +74,16 @@ function hs_post_date_local($p) {
 
 // SEO meta
 $site_title = $settings['site_title'] ?? 'NEWS HDSPTV';
-$page_title = $post['title'] . ' – ' . $site_title;
-$meta_desc = $post['excerpt'] ?: ($settings['seo_meta_description'] ?? '');
-$meta_keys = $settings['seo_meta_keywords'] ?? '';
+$meta = hs_auto_meta('post', $post, $settings);
+$page_title = $meta['title'];
+$meta_desc = $meta['desc'];
+$meta_keys = $meta['keywords'];
 if (!empty($tags)) {
     $tag_names = array_column($tags, 'name');
     $meta_keys = $meta_keys . ', ' . implode(', ', $tag_names);
 }
 $categoryName = $post['category_name'] ?: 'News';
-$canonical = hs_base_url('post.php?slug=' . urlencode($post['slug']));
+$canonical = hs_post_url($post['slug']);
 
 $og_image = '';
 if (!empty($post['image_main'])) {
@@ -101,7 +102,7 @@ if (!empty($post['image_main'])) {
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
-  <?= hs_hreflang_links('post.php?slug=' . urlencode($post['slug'])) ?>
+  <?= hs_hreflang_links('post/' . rawurlencode($post['slug'])) ?>
 
   <?php if ($og_image): ?>
     <meta property="og:image" content="<?= htmlspecialchars($og_image) ?>">
@@ -134,6 +135,32 @@ if (!empty($post['image_main'])) {
       "@type": "Organization",
       "name": <?= json_encode($site_title) ?>
     }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": <?= json_encode(hs_base_url('/')) ?>
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": <?= json_encode($post['category_name'] ?? 'News') ?>,
+        "item": <?= json_encode(hs_base_url('/')) ?>
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": <?= json_encode($post['title']) ?>,
+        "item": <?= json_encode($canonical) ?>
+      }
+    ]
   }
   </script>
   <?php endif; ?>
@@ -424,23 +451,23 @@ if (!empty($post['image_main'])) {
   </div>
   <nav class="nav-main">
     <a href="<?= hs_base_url('index.php#top') ?>">Home</a>
-    <a href="<?= hs_base_url('category.php?slug=india') ?>">India</a>
-    <a href="<?= hs_base_url('category.php?slug=gcc') ?>">GCC</a>
-    <a href="<?= hs_base_url('category.php?slug=kerala') ?>">Kerala</a>
-    <a href="<?= hs_base_url('category.php?slug=world') ?>">World</a>
-    <a href="<?= hs_base_url('category.php?slug=sports') ?>">Sports</a>
-    <a href="<?= hs_base_url('category.php?slug=entertainment') ?>">Entertainment</a>
-    <a href="<?= hs_base_url('category.php?slug=business') ?>">Business</a>
-    <a href="<?= hs_base_url('category.php?slug=technology') ?>">Technology</a>
-    <a href="<?= hs_base_url('category.php?slug=lifestyle') ?>">Lifestyle</a>
-    <a href="<?= hs_base_url('category.php?slug=health') ?>">Health</a>
-    <a href="<?= hs_base_url('category.php?slug=travel') ?>">Travel</a>
-    <a href="<?= hs_base_url('category.php?slug=auto') ?>">Auto</a>
-    <a href="<?= hs_base_url('category.php?slug=opinion') ?>">Opinion</a>
-    <a href="<?= hs_base_url('category.php?slug=politics') ?>">Politics</a>
-    <a href="<?= hs_base_url('category.php?slug=crime') ?>">Crime</a>
-    <a href="<?= hs_base_url('category.php?slug=education') ?>">Education</a>
-    <a href="<?= hs_base_url('category.php?slug=religion') ?>">Religion</a>
+    <a href="<?= hs_category_url('india') ?>">India</a>
+    <a href="<?= hs_category_url('gcc') ?>">GCC</a>
+    <a href="<?= hs_category_url('kerala') ?>">Kerala</a>
+    <a href="<?= hs_category_url('world') ?>">World</a>
+    <a href="<?= hs_category_url('sports') ?>">Sports</a>
+    <a href="<?= hs_category_url('entertainment') ?>">Entertainment</a>
+    <a href="<?= hs_category_url('business') ?>">Business</a>
+    <a href="<?= hs_category_url('technology') ?>">Technology</a>
+    <a href="<?= hs_category_url('lifestyle') ?>">Lifestyle</a>
+    <a href="<?= hs_category_url('health') ?>">Health</a>
+    <a href="<?= hs_category_url('travel') ?>">Travel</a>
+    <a href="<?= hs_category_url('auto') ?>">Auto</a>
+    <a href="<?= hs_category_url('opinion') ?>">Opinion</a>
+    <a href="<?= hs_category_url('politics') ?>">Politics</a>
+    <a href="<?= hs_category_url('crime') ?>">Crime</a>
+    <a href="<?= hs_category_url('education') ?>">Education</a>
+    <a href="<?= hs_category_url('religion') ?>">Religion</a>
   </nav>
   <form class="nav-search" action="<?= hs_base_url('search.php') ?>" method="get">
     <input type="text" name="q" placeholder="Search news..." value="<?= isset($_GET['q']) ? htmlspecialchars($_GET['q']) : '' ?>">
@@ -469,9 +496,9 @@ if (!empty($post['image_main'])) {
       <?php endif; ?>
       <div class="article-inner">
         <nav class="breadcrumb">
-          <a href="<?= hs_base_url('index.php') ?>">Home</a>
+          <a href="<?= hs_base_url('/') ?>">Home</a>
           <?php if (!empty($categoryName)): ?>
-            › <a href="<?= hs_base_url('category.php?slug=' . urlencode(strtolower($categoryName))) ?>"><?= htmlspecialchars($categoryName) ?></a>
+            › <a href="<?= hs_category_url(strtolower($categoryName)) ?>"><?= htmlspecialchars($categoryName) ?></a>
           <?php endif; ?>
         </nav>
         <div class="article-kicker">
@@ -536,7 +563,7 @@ if (!empty($post['image_main'])) {
           <div class="article-tags">
             <strong>Tags:</strong>
             <?php foreach ($tags as $tag): ?>
-              <a href="<?= hs_base_url('tag.php?slug=' . urlencode($tag['slug'])) ?>"><?= htmlspecialchars($tag['name']) ?></a>
+              <a href="<?= hs_tag_url($tag['slug']) ?>"><?= htmlspecialchars($tag['name']) ?></a>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
@@ -561,7 +588,7 @@ if (!empty($post['image_main'])) {
             <ul class="related-list">
               <?php foreach ($related as $r): ?>
                 <li>
-                  <a href="<?= hs_base_url('post.php?slug=' . urlencode($r['slug'])) ?>"><?= htmlspecialchars($r['title']) ?></a>
+                  <a href="<?= hs_post_url($r['slug']) ?>"><?= htmlspecialchars($r['title']) ?></a>
                   <span style="font-size:11px;color:#9CA3AF;"> · <?= hs_post_date_local($r) ?></span>
                 </li>
               <?php endforeach; ?>
@@ -580,7 +607,7 @@ if (!empty($post['image_main'])) {
           <ul class="sidebar-list">
             <?php foreach ($trending as $t): ?>
               <li>
-                <a href="<?= hs_base_url('post.php?slug=' . urlencode($t['slug'])) ?>"><?= htmlspecialchars($t['title']) ?></a>
+                <a href="<?= hs_post_url($t['slug']) ?>"><?= htmlspecialchars($t['title']) ?></a>
                 <div style="font-size:11px;color:#9CA3AF;"><?= hs_post_date_local($t) ?></div>
               </li>
             <?php endforeach; ?>

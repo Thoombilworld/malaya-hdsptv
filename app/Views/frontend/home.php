@@ -21,7 +21,7 @@
     "inLanguage": <?= json_encode(hs_locale()) ?>,
     "potentialAction": {
       "@type": "SearchAction",
-      "target": <?= json_encode(hs_base_url('search.php?q={search_term_string}')) ?>,
+      "target": <?= json_encode(hs_base_url('search/{search_term_string}')) ?>,
       "query-input": "required name=search_term_string"
     }
   }
@@ -58,7 +58,7 @@
   };
 
   $articleLink = static function(array $row): string {
-      return hs_base_url('post.php?slug=' . urlencode($row['slug'] ?? ''));
+      return hs_post_url($row['slug'] ?? '');
   };
 ?>
 
@@ -85,14 +85,14 @@
 
     <nav class="top-nav" id="top-nav" data-top-nav aria-label="Main navigation">
       <a href="<?= hs_base_url('/') ?>"><?= htmlspecialchars(hs_t('home')) ?></a>
-      <a href="<?= hs_base_url('category.php?slug=india') ?>"><?= htmlspecialchars(hs_t('india')) ?></a>
-      <a href="<?= hs_base_url('category.php?slug=gcc') ?>"><?= htmlspecialchars(hs_t('gcc')) ?></a>
-      <a href="<?= hs_base_url('category.php?slug=world') ?>"><?= htmlspecialchars(hs_t('world')) ?></a>
-      <a href="<?= hs_base_url('category.php?slug=sports') ?>"><?= htmlspecialchars(hs_t('sports')) ?></a>
-      <a class="live-btn" href="<?= hs_base_url('live.php') ?>"><?= htmlspecialchars(hs_t('live_tv')) ?></a>
+      <a href="<?= hs_category_url('india') ?>"><?= htmlspecialchars(hs_t('india')) ?></a>
+      <a href="<?= hs_category_url('gcc') ?>"><?= htmlspecialchars(hs_t('gcc')) ?></a>
+      <a href="<?= hs_category_url('world') ?>"><?= htmlspecialchars(hs_t('world')) ?></a>
+      <a href="<?= hs_category_url('sports') ?>"><?= htmlspecialchars(hs_t('sports')) ?></a>
+      <a class="live-btn" href="<?= hs_base_url('live') ?>"><?= htmlspecialchars(hs_t('live_tv')) ?></a>
     </nav>
 
-    <form class="search-inline" method="get" action="<?= hs_base_url('search.php') ?>">
+    <form class="search-inline" method="get" action="<?= hs_base_url('search') ?>">
       <input type="text" name="q" placeholder="<?= htmlspecialchars(hs_t('search_stories')) ?>" aria-label="<?= htmlspecialchars(hs_t('search_stories')) ?>">
     </form>
 
@@ -188,13 +188,13 @@
       <section class="live-promo">
         <h2>Watch HDSPTV Live</h2>
         <p>Follow live programs, breaking updates, and rolling coverage from our international desk.</p>
-        <a class="btn btn-primary" href="<?= hs_base_url('live.php') ?>">Open Live TV</a>
+        <a class="btn btn-primary" href="<?= hs_base_url('live') ?>">Open Live TV</a>
       </section>
     </section>
 
     <aside class="col-4 col-md-12 stack-24">
       <section class="panel">
-        <div class="section-head"><h2><a href="<?= hs_base_url('trending.php') ?>">Trending Now</a></h2></div>
+        <div class="section-head"><h2><a href="<?= hs_base_url('trending') ?>">Trending Now</a></h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeTrending, 0, 6) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a><div class="meta"><?= $formatDate($item) ?></div></li>
@@ -212,7 +212,7 @@
       </section>
 
       <section class="panel">
-        <div class="section-head"><h2><a href="<?= hs_base_url('video.php') ?>">Video News</a></h2></div>
+        <div class="section-head"><h2><a href="<?= hs_base_url('video') ?>">Video News</a></h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeVideos, 0, 4) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></li>
@@ -238,7 +238,7 @@
       <strong><?= htmlspecialchars($settings['site_title'] ?? 'HDSPTV') ?></strong>
       <p class="meta"><?= htmlspecialchars($settings['tagline'] ?? 'International newsroom coverage across India, GCC, Kerala and beyond.') ?></p>
     </div>
-    <div class="footer-links"><a href="<?= hs_base_url('about.php') ?>">About</a><a href="<?= hs_base_url('contact.php') ?>">Contact</a><a href="<?= hs_base_url('profile.php') ?>">Profile</a></div>
+    <div class="footer-links"><a href="<?= hs_base_url('about') ?>">About</a><a href="<?= hs_base_url('contact') ?>">Contact</a><a href="<?= hs_base_url('profile') ?>">Profile</a></div>
   </div>
 </footer>
 </body>

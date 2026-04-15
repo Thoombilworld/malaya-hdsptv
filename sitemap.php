@@ -15,12 +15,13 @@ $addUrl = static function (&$urls, $loc, $lastmod, $changefreq = 'daily', $prior
 };
 
 $addUrl($urls, hs_base_url('/'), $now, 'hourly', '1.0');
-$addUrl($urls, hs_base_url('breaking.php'), $now, 'hourly', '0.9');
-$addUrl($urls, hs_base_url('trending.php'), $now, 'hourly', '0.9');
-$addUrl($urls, hs_base_url('video.php'), $now, 'daily', '0.8');
-$addUrl($urls, hs_base_url('gallery.php'), $now, 'daily', '0.8');
-$addUrl($urls, hs_base_url('about.php'), $now, 'monthly', '0.4');
-$addUrl($urls, hs_base_url('contact.php'), $now, 'monthly', '0.4');
+$addUrl($urls, hs_base_url('breaking'), $now, 'hourly', '0.9');
+$addUrl($urls, hs_base_url('trending'), $now, 'hourly', '0.9');
+$addUrl($urls, hs_base_url('video'), $now, 'daily', '0.8');
+$addUrl($urls, hs_base_url('gallery'), $now, 'daily', '0.8');
+$addUrl($urls, hs_base_url('live'), $now, 'hourly', '0.8');
+$addUrl($urls, hs_base_url('about'), $now, 'monthly', '0.4');
+$addUrl($urls, hs_base_url('contact'), $now, 'monthly', '0.4');
 
 if (defined('HS_INSTALLED') && HS_INSTALLED) {
     $db = hs_db();
@@ -31,7 +32,7 @@ if (defined('HS_INSTALLED') && HS_INSTALLED) {
             $last = !empty($row['updated_at']) ? strtotime($row['updated_at']) : strtotime($row['created_at'] ?? 'now');
             $addUrl(
                 $urls,
-                hs_base_url('post.php?slug=' . urlencode($row['slug'] ?? '')),
+                hs_post_url($row['slug'] ?? ''),
                 gmdate('c', $last ?: time()),
                 'daily',
                 '0.8'
@@ -45,7 +46,7 @@ if (defined('HS_INSTALLED') && HS_INSTALLED) {
             $last = !empty($row['updated_at']) ? strtotime($row['updated_at']) : strtotime($row['created_at'] ?? 'now');
             $addUrl(
                 $urls,
-                hs_base_url('category.php?slug=' . urlencode($row['slug'] ?? '')),
+                hs_category_url($row['slug'] ?? ''),
                 gmdate('c', $last ?: time()),
                 'daily',
                 '0.7'
@@ -59,7 +60,7 @@ if (defined('HS_INSTALLED') && HS_INSTALLED) {
             $last = strtotime($row['created_at'] ?? 'now');
             $addUrl(
                 $urls,
-                hs_base_url('tag.php?slug=' . urlencode($row['slug'] ?? '')),
+                hs_tag_url($row['slug'] ?? ''),
                 gmdate('c', $last ?: time()),
                 'weekly',
                 '0.6'
