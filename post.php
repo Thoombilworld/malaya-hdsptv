@@ -137,6 +137,8 @@ if (!empty($post['image_main'])) {
   <?php endif; ?>
 
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
+  <?= hs_pwa_head_tags() ?>
+  <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
 
   <style>
     :root {

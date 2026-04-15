@@ -11,6 +11,21 @@ function hs_view($view, $data = []) {
     include __DIR__ . '/app/Views/' . $view . '.php';
 }
 
+function hs_pwa_head_tags() {
+    $manifest = hs_base_url('manifest.webmanifest');
+    $themeColor = '#0B1220';
+    $icon192 = hs_base_url('assets/images/icons/icon-192.svg');
+    return implode("\n", [
+        '<meta name="theme-color" content="' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '">',
+        '<meta name="mobile-web-app-capable" content="yes">',
+        '<meta name="apple-mobile-web-app-capable" content="yes">',
+        '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
+        '<meta name="apple-mobile-web-app-title" content="' . htmlspecialchars(HS_APP_NAME, ENT_QUOTES, 'UTF-8') . '">',
+        '<link rel="manifest" href="' . htmlspecialchars($manifest, ENT_QUOTES, 'UTF-8') . '">',
+        '<link rel="apple-touch-icon" href="' . htmlspecialchars($icon192, ENT_QUOTES, 'UTF-8') . '">',
+    ]);
+}
+
 function hs_settings() {
     static $settings = null;
     if ($settings !== null) return $settings;

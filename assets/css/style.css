@@ -73,6 +73,14 @@ a:hover { color: var(--red); }
 .top-nav { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .top-nav a { font-size: 14px; font-weight: 600; color: #374151; }
 .live-btn { background: var(--red); color: #fff !important; padding: 10px 16px; border-radius: 999px; }
+.mobile-menu-btn {
+  display: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
 .search-inline { margin-left: auto; }
 .search-inline input {
   width: 220px; height: 48px; border: 1px solid var(--border); border-radius: 999px;
@@ -83,6 +91,14 @@ a:hover { color: var(--red); }
   align-items: center;
   gap: 10px;
   font-size: 14px;
+}
+.install-app-btn {
+  border: 1px solid var(--red);
+  color: var(--red);
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
 }
 .lang-selector {
   height: 40px;
@@ -184,7 +200,8 @@ a:hover { color: var(--red); }
   .container { width: min(var(--content-max), calc(100% - 64px)); }
   .col-md-12 { grid-column: span 12; }
   .card-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .header-utils { order: 4; width: 100%; justify-content: flex-end; }
+  .header-utils { order: 4; width: 100%; justify-content: space-between; }
+  .search-inline input { width: 180px; }
 }
 
 @media (max-width: 760px) {
@@ -192,12 +209,29 @@ a:hover { color: var(--red); }
   .top-strip { display: none; }
   .nav-shell { flex-wrap: wrap; gap: var(--space-2); padding: 10px 0; }
   .brand { min-width: 0; }
-  .top-nav { width: 100%; order: 3; }
+  .mobile-menu-btn { display: inline-flex; margin-left: auto; }
+  .top-nav {
+    width: 100%;
+    order: 3;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .top-nav.is-open { display: flex; }
+  .top-nav a { width: 100%; padding: 8px 4px; }
   .search-inline { margin-left: 0; width: 100%; order: 2; }
   .search-inline input { width: 100%; }
-  .header-utils { justify-content: space-between; }
+  .header-utils { justify-content: space-between; width: 100%; }
+  .lang-selector { flex: 1; min-width: 80px; }
+  .install-app-btn { white-space: nowrap; }
   .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
   .hero-media { height: 220px; }
+  .hero-content { padding: 18px; }
+  .hero-content h1 { font-size: clamp(24px, 8vw, 32px); }
   .footer-row { flex-direction: column; align-items: flex-start; }
 }
 

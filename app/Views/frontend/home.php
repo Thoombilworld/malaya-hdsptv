@@ -6,6 +6,8 @@
   <meta name="description" content="<?= htmlspecialchars($settings['seo_meta_description'] ?? ($settings['tagline'] ?? '')) ?>">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
+  <?= hs_pwa_head_tags() ?>
+  <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
 </head>
 <body>
 <?php
@@ -61,8 +63,9 @@
         <small>International News Network</small>
       </span>
     </a>
+    <button class="mobile-menu-btn" data-nav-toggle aria-controls="top-nav" aria-expanded="false">Menu</button>
 
-    <nav class="top-nav" aria-label="Main navigation">
+    <nav class="top-nav" id="top-nav" data-top-nav aria-label="Main navigation">
       <a href="<?= hs_base_url('/') ?>">Home</a>
       <a href="<?= hs_base_url('category.php?slug=india') ?>">India</a>
       <a href="<?= hs_base_url('category.php?slug=gcc') ?>">GCC</a>
@@ -76,6 +79,7 @@
     </form>
 
     <div class="header-utils">
+      <button class="install-app-btn" data-install-app hidden>Install App</button>
       <select aria-label="Language selector" class="lang-selector"><option>EN</option><option>ML</option><option>AR</option></select>
       <a href="<?= hs_base_url('auth/login.php') ?>">Login</a>
       <a href="<?= hs_base_url('auth/register.php') ?>">Register</a>

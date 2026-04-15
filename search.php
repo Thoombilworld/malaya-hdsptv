@@ -47,6 +47,8 @@ $canonical = hs_base_url('search.php' . ($q !== '' ? ('?q=' . urlencode($q)) : '
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
   <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
+  <?= hs_pwa_head_tags() ?>
+  <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
   <style>
     :root {
       --hs-primary: #1E3A8A;
