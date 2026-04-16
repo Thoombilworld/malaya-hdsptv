@@ -376,7 +376,7 @@ function hs_settings() {
     $settings = [
         'site_title' => HS_APP_NAME,
         'tagline'    => 'News for India, GCC, Kerala & the World',
-        'logo'       => hs_base_url('assets/images/logo.png'),
+        'logo'       => hs_base_url('assets/images/icons/icon-192.svg'),
     ];
 
     if (defined('HS_INSTALLED') && HS_INSTALLED) {
