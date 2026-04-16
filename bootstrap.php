@@ -204,13 +204,25 @@ function hs_search_url($query = '') {
 }
 
 function hs_admin_url($path = 'index.php', $query = '') {
-    $url = hs_base_url('admin/' . ltrim((string)$path, '/'));
+    $path = ltrim((string)$path, '/');
+    if ($path === '') {
+        $path = 'index.php';
+    } elseif (strpos($path, '.') === false) {
+        $path .= '.php';
+    }
+    $url = hs_base_url('admin/' . $path);
     $query = ltrim((string)$query, '?');
     return $query !== '' ? ($url . '?' . $query) : $url;
 }
 
 function hs_admin_content_url($path = 'index.php', $query = '') {
-    $url = hs_base_url('admin/content/' . ltrim((string)$path, '/'));
+    $path = ltrim((string)$path, '/');
+    if ($path === '') {
+        $path = 'index.php';
+    } elseif (strpos($path, '.') === false) {
+        $path .= '.php';
+    }
+    $url = hs_base_url('admin/content/' . $path);
     $query = ltrim((string)$query, '?');
     return $query !== '' ? ($url . '?' . $query) : $url;
 }

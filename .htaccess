@@ -1,6 +1,13 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
+RewriteRule ^admin/?$ admin/index.php [L]
+RewriteRule ^admin/login/?$ admin/login.php [L]
+RewriteRule ^admin/logout/?$ admin/logout.php [L]
+RewriteRule ^admin/(users|ads|seo|social|social_dispatch|homepage|logs)/?$ admin/$1.php [L]
+RewriteRule ^admin/content/?$ admin/content/index.php [L]
+RewriteRule ^admin/content/(articles|article_add|article_edit|article_delete|categories|tags)/?$ admin/content/$1.php [QSA,L]
+
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 RewriteRule ^robots\.txt$ robots.php [L]
 RewriteRule ^post/([^/]+)/?$ post.php?slug=$1 [QSA,L]
