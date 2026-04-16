@@ -6,6 +6,7 @@ $root = dirname(__DIR__);
 chdir($root);
 
 $errors = [];
+$manifest = require __DIR__ . '/hdsptv_manifest.php';
 
 function err(array &$errors, string $message): void
 {
@@ -174,65 +175,9 @@ function collect_source_files(array $extensions): array
     return $files;
 }
 
-$requiredDirs = [
-    'admin',
-    'admin/content',
-    'app',
-    'app/Modules/Admin',
-    'app/Modules/Content',
-    'app/Views/frontend',
-    'assets/css',
-    'assets/images',
-    'assets/js',
-    'assets/images/icons',
-    'auth',
-    'config',
-    'docs',
-    'install',
-    'laravel',
-    'Live-News-Portal-in-PHP-main',
-    'tools',
-    'writable/logs',
-    'writable/uploads/images',
-];
-
-$requiredFiles = [
-    '.htaccess',
-    'bootstrap.php',
-    'config/config.php',
-    'index.php',
-    'post.php',
-    'category.php',
-    'tag.php',
-    'search.php',
-    'about.php',
-    'contact.php',
-    'gallery.php',
-    'live.php',
-    'notifications.php',
-    'profile.php',
-    'saved.php',
-    'sitemap.php',
-    'trending.php',
-    'video.php',
-    'robots.php',
-    'offline.html',
-    'manifest.webmanifest',
-    'service-worker.js',
-    'README.md',
-    'README_INSTALL.txt',
-    'admin/_layout.php',
-    'admin/index.php',
-    'admin/login.php',
-    'admin/content/articles.php',
-    'assets/css/style.css',
-    'assets/js/pwa.js',
-    'assets/images/icons/icon-192.svg',
-    'assets/images/icons/icon-512.svg',
-    'install/index.php',
-    'install/install.sql',
-    'tools/validate_hdsptv_integrity.php',
-];
+$requiredDirs = $manifest['required_dirs'] ?? [];
+$requiredFiles = $manifest['required_files'] ?? [];
+$allowedTopLevel = $manifest['allowed_top_level'] ?? [];
 
 foreach ($requiredDirs as $dir) {
     if (!is_dir($dir)) {
@@ -243,6 +188,13 @@ foreach ($requiredDirs as $dir) {
 foreach ($requiredFiles as $file) {
     if (!is_file($file)) {
         err($errors, "Missing required file: {$file}");
+    }
+}
+
+$topLevelEntries = array_values(array_filter(scandir('.') ?: [], static fn (string $entry): bool => $entry !== '.' && $entry !== '..'));
+foreach ($topLevelEntries as $entry) {
+    if (!in_array($entry, $allowedTopLevel, true)) {
+        err($errors, "Unexpected top-level entry (remove if not needed): {$entry}");
     }
 }
 
