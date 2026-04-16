@@ -114,6 +114,23 @@ function path_exists_with_fallbacks(string $path): bool
     return false;
 }
 
+function reference_resolves(string $reference, string $sourceFile, array $routeTargetCandidates, array $virtualTargets): bool
+{
+    $candidates = candidate_paths($reference, $sourceFile);
+    foreach ($candidates as $candidate) {
+        $trimmed = trim($candidate, '/');
+        if (
+            path_exists_with_fallbacks($candidate)
+            || in_array($trimmed, $routeTargetCandidates, true)
+            || in_array($trimmed, $virtualTargets, true)
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function collect_source_files(array $extensions): array
 {
     $files = [];
@@ -275,21 +292,7 @@ foreach ($sourceFiles as $file) {
                 continue;
             }
 
-            $candidates = candidate_paths($path, $file);
-            $found = false;
-            foreach ($candidates as $candidate) {
-                $trimmed = trim($candidate, '/');
-                if (
-                    path_exists_with_fallbacks($candidate)
-                    || in_array($trimmed, $routeTargetCandidates, true)
-                    || in_array($trimmed, $virtualTargets, true)
-                ) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
+            if (!reference_resolves($path, $file, $routeTargetCandidates, $virtualTargets)) {
                 err($errors, "{$file}: unresolved hs_base_url path '{$path}'.");
             }
         }
@@ -351,21 +354,7 @@ foreach ($sourceFiles as $file) {
                 continue;
             }
 
-            $candidates = candidate_paths($reference, $file);
-            $found = false;
-            foreach ($candidates as $candidate) {
-                $trimmed = trim($candidate, '/');
-                if (
-                    path_exists_with_fallbacks($candidate)
-                    || in_array($trimmed, $routeTargetCandidates, true)
-                    || in_array($trimmed, $virtualTargets, true)
-                ) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
+            if (!reference_resolves($reference, $file, $routeTargetCandidates, $virtualTargets)) {
                 err($errors, "{$file}: unresolved static reference '{$reference}'.");
             }
         }
@@ -388,20 +377,7 @@ if (is_file($manifestPath)) {
                 continue;
             }
 
-            $candidates = candidate_paths($reference, $manifestPath);
-            $found = false;
-            foreach ($candidates as $candidate) {
-                $trimmed = trim($candidate, '/');
-                if (
-                    path_exists_with_fallbacks($candidate)
-                    || in_array($trimmed, $routeTargetCandidates, true)
-                    || in_array($trimmed, $virtualTargets, true)
-                ) {
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
+            if (!reference_resolves($reference, $manifestPath, $routeTargetCandidates, $virtualTargets)) {
                 err($errors, "manifest.webmanifest: unresolved {$key} '{$reference}'.");
             }
         }
@@ -439,21 +415,7 @@ if (is_file($swPath)) {
                 continue;
             }
 
-            $candidates = candidate_paths($assetPath, $swPath);
-            $found = false;
-            foreach ($candidates as $candidate) {
-                $trimmed = trim($candidate, '/');
-                if (
-                    path_exists_with_fallbacks($candidate)
-                    || in_array($trimmed, $routeTargetCandidates, true)
-                    || in_array($trimmed, $virtualTargets, true)
-                ) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
+            if (!reference_resolves($assetPath, $swPath, $routeTargetCandidates, $virtualTargets)) {
                 err($errors, "service-worker.js: unresolved STATIC_ASSETS entry '{$assetPath}'.");
             }
         }
