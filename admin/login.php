@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../bootstrap.php';
 if (hs_is_admin_logged_in()) {
-    header('Location: ' . hs_base_url('admin/index.php'));
+    header('Location: ' . hs_admin_url('index.php'));
     exit;
 }
 $error = '';
@@ -33,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             hs_log_event('info', 'Admin login success', ['user_id' => $user['id'], 'role' => $user['role']]);
             if ($user['role'] === 'reporter') {
-                header('Location: ' . hs_base_url('admin/content/article_add.php'));
+                header('Location: ' . hs_admin_content_url('article_add.php'));
             } else {
-                header('Location: ' . hs_base_url('admin/index.php'));
+                header('Location: ' . hs_admin_url('index.php'));
             }
             exit;
         }
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error-box"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
-      <form method="post" novalidate>
+      <form method="post" action="<?= hs_admin_url('login.php') ?>" novalidate>
         <?= hs_csrf_input() ?>
         <div class="field">
           <label for="email">Email</label>

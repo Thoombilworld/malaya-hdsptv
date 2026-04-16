@@ -76,7 +76,7 @@ hs_admin_shell_start('Staff Users – HDSPTV', 'Users & Roles', 'staff');
     <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
-    <form method="post">
+    <form method="post" action="<?= hs_admin_url('users.php') ?>">
       <?= hs_csrf_input() ?>
       <div class="field"><label>Name</label><input type="text" name="name" required></div>
       <div class="field"><label>Email</label><input type="email" name="email" required></div>

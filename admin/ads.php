@@ -31,7 +31,7 @@ hs_admin_shell_start('Ads Manager – HDSPTV', 'Ads & Banners', 'ads');
     <h2>Update Ad Slot</h2>
     <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($msg): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
-    <form method="post">
+    <form method="post" action="<?= hs_admin_url('ads.php') ?>">
       <?= hs_csrf_input() ?>
       <div class="field"><label>Slot</label><select name="slot" style="height:50px;border:1px solid var(--border);border-radius:12px;padding:0 12px;"><option value="homepage_right">Homepage Right Sidebar</option><option value="homepage_top">Homepage Top</option><option value="homepage_inline">Homepage Inline</option></select></div>
       <div class="field"><label>Ad Image URL</label><input type="text" name="image_url"></div>

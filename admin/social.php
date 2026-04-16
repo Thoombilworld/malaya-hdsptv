@@ -43,9 +43,9 @@ hs_admin_shell_start('Social Manager – HDSPTV', 'Social Channels', 'social');
   <p class="muted">Configure channel URLs and optional webhook-based social automation.</p>
   <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if ($msg): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
-  <p><a class="btn btn-secondary" href="<?= hs_base_url('admin/social_dispatch.php') ?>">Open Social Dispatcher</a></p>
+  <p><a class="btn btn-secondary" href="<?= hs_admin_url('social_dispatch.php') ?>">Open Social Dispatcher</a></p>
 
-  <form method="post">
+  <form method="post" action="<?= hs_admin_url('social.php') ?>">
     <?= hs_csrf_input() ?>
     <?php
       $fields = [

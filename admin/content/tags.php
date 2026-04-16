@@ -28,7 +28,7 @@ if (isset($_GET['delete'])) {
         mysqli_query($db, "DELETE FROM hs_post_tags WHERE tag_id=".$id);
         mysqli_query($db, "DELETE FROM hs_tags WHERE id=".$id." LIMIT 1");
     }
-    header('Location: ' . hs_base_url('admin/content/tags.php'));
+    header('Location: ' . hs_admin_content_url('tags.php'));
     exit;
 }
 
@@ -49,7 +49,7 @@ hs_admin_shell_start('Tags – HDSPTV', 'Tags', 'content');
   <article class="card col-4 col-md-12">
     <h2>Add Tag</h2>
     <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <form method="post">
+    <form method="post" action="<?= hs_admin_content_url('tags.php') ?>">
     <?= hs_csrf_input() ?>
       <div class="field">
         <label>Name</label>
@@ -73,7 +73,7 @@ hs_admin_shell_start('Tags – HDSPTV', 'Tags', 'content');
               <td><?= (int)$t['id'] ?></td>
               <td><?= htmlspecialchars($t['name']) ?></td>
               <td><?= htmlspecialchars($t['slug']) ?></td>
-              <td><a href="<?= hs_base_url('admin/content/tags.php?delete='.(int)$t['id']) ?>" onclick="return confirm('Delete this tag?')">Delete</a></td>
+              <td><a href="<?= hs_admin_content_url('tags.php', 'delete='.(int)$t['id']) ?>" onclick="return confirm('Delete this tag?')">Delete</a></td>
             </tr>
           <?php endforeach; ?>
           </tbody>

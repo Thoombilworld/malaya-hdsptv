@@ -2,22 +2,22 @@
 
 function hs_admin_nav_items(): array {
     $all = [
-        'dashboard' => ['label' => 'Dashboard', 'href' => hs_base_url('admin/index.php'), 'permission' => 'dashboard.view'],
-        'content' => ['label' => 'News', 'href' => hs_base_url('admin/content/index.php'), 'permission' => 'article.create'],
-        'breaking' => ['label' => 'Breaking News', 'href' => hs_base_url('admin/content/articles.php?status=published'), 'permission' => 'article.publish'],
-        'live' => ['label' => 'Live TV', 'href' => hs_base_url('admin/homepage.php'), 'permission' => 'article.publish'],
-        'categories' => ['label' => 'Categories', 'href' => hs_base_url('admin/content/categories.php'), 'permission' => 'category.manage'],
-        'media' => ['label' => 'Media Library', 'href' => hs_base_url('admin/content/article_add.php'), 'permission' => 'article.create'],
-        'videos' => ['label' => 'Videos', 'href' => hs_base_url('admin/content/articles.php'), 'permission' => 'article.create'],
-        'homepage' => ['label' => 'Homepage', 'href' => hs_base_url('admin/homepage.php'), 'permission' => 'article.publish'],
-        'seo' => ['label' => 'SEO', 'href' => hs_base_url('admin/seo.php'), 'permission' => 'seo.manage'],
-        'social' => ['label' => 'Social', 'href' => hs_base_url('admin/social.php'), 'permission' => 'seo.manage'],
-        'ads' => ['label' => 'Ads', 'href' => hs_base_url('admin/ads.php'), 'permission' => 'ads.manage'],
-        'staff' => ['label' => 'Users & Roles', 'href' => hs_base_url('admin/users.php'), 'permission' => 'user.manage'],
-        'analytics' => ['label' => 'Analytics', 'href' => hs_base_url('admin/index.php'), 'permission' => 'dashboard.view'],
-        'settings' => ['label' => 'Settings', 'href' => hs_base_url('admin/seo.php'), 'permission' => 'settings.manage'],
-        'logs' => ['label' => 'Audit Logs', 'href' => hs_base_url('admin/logs.php'), 'permission' => 'settings.manage'],
-        'logout' => ['label' => 'Logout', 'href' => hs_base_url('admin/logout.php'), 'permission' => null],
+        'dashboard' => ['label' => 'Dashboard', 'href' => hs_admin_url('index.php'), 'permission' => 'dashboard.view'],
+        'content' => ['label' => 'News', 'href' => hs_admin_content_url('index.php'), 'permission' => 'article.create'],
+        'breaking' => ['label' => 'Breaking News', 'href' => hs_admin_content_url('articles.php', 'status=published'), 'permission' => 'article.publish'],
+        'live' => ['label' => 'Live TV', 'href' => hs_admin_url('homepage.php'), 'permission' => 'article.publish'],
+        'categories' => ['label' => 'Categories', 'href' => hs_admin_content_url('categories.php'), 'permission' => 'category.manage'],
+        'media' => ['label' => 'Media Library', 'href' => hs_admin_content_url('article_add.php'), 'permission' => 'article.create'],
+        'videos' => ['label' => 'Videos', 'href' => hs_admin_content_url('articles.php'), 'permission' => 'article.create'],
+        'homepage' => ['label' => 'Homepage', 'href' => hs_admin_url('homepage.php'), 'permission' => 'article.publish'],
+        'seo' => ['label' => 'SEO', 'href' => hs_admin_url('seo.php'), 'permission' => 'seo.manage'],
+        'social' => ['label' => 'Social', 'href' => hs_admin_url('social.php'), 'permission' => 'seo.manage'],
+        'ads' => ['label' => 'Ads', 'href' => hs_admin_url('ads.php'), 'permission' => 'ads.manage'],
+        'staff' => ['label' => 'Users & Roles', 'href' => hs_admin_url('users.php'), 'permission' => 'user.manage'],
+        'analytics' => ['label' => 'Analytics', 'href' => hs_admin_url('index.php'), 'permission' => 'dashboard.view'],
+        'settings' => ['label' => 'Settings', 'href' => hs_admin_url('seo.php'), 'permission' => 'settings.manage'],
+        'logs' => ['label' => 'Audit Logs', 'href' => hs_admin_url('logs.php'), 'permission' => 'settings.manage'],
+        'logout' => ['label' => 'Logout', 'href' => hs_admin_url('logout.php'), 'permission' => null],
     ];
 
     $items = [];
@@ -65,14 +65,14 @@ function hs_admin_shell_start(string $title, string $pageTitle, string $active =
         </div>
         <div class="admin-actions">
           <div class="admin-search">
-            <form method="get" action="<?= hs_base_url('admin/content/articles.php') ?>">
+            <form method="get" action="<?= hs_admin_content_url('articles.php') ?>">
               <input type="text" name="q" placeholder="Global search stories...">
             </form>
           </div>
-          <a class="btn btn-secondary" href="<?= hs_base_url('admin/content/article_add.php') ?>">+ Create News</a>
-          <a class="btn btn-secondary" href="<?= hs_base_url('admin/homepage.php') ?>">Go Live</a>
-          <a class="btn btn-secondary" href="<?= hs_base_url('admin/social_dispatch.php') ?>">Send Alert</a>
-          <a class="btn btn-primary" href="<?= hs_base_url('admin/content/article_add.php') ?>">Upload Video</a>
+          <a class="btn btn-secondary" href="<?= hs_admin_content_url('article_add.php') ?>">+ Create News</a>
+          <a class="btn btn-secondary" href="<?= hs_admin_url('homepage.php') ?>">Go Live</a>
+          <a class="btn btn-secondary" href="<?= hs_admin_url('social_dispatch.php') ?>">Send Alert</a>
+          <a class="btn btn-primary" href="<?= hs_admin_content_url('article_add.php') ?>">Upload Video</a>
           <span class="admin-live-pill">LIVE DESK</span>
           <button class="btn btn-secondary" type="button" data-theme-toggle>Dark/Light</button>
           <div class="admin-time" data-admin-time></div>

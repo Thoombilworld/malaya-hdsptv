@@ -39,7 +39,7 @@ hs_admin_shell_start('SEO Manager – HDSPTV', 'SEO Manager', 'seo');
   <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if ($msg): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
 
-  <form method="post">
+  <form method="post" action="<?= hs_admin_url('seo.php') ?>">
     <?= hs_csrf_input() ?>
     <div class="field"><label>Meta Description</label><textarea name="seo_meta_description" style="width:100%;min-height:90px;border:1px solid var(--border);border-radius:12px;padding:12px;"><?= htmlspecialchars($settings['seo_meta_description'] ?? '') ?></textarea></div>
     <div class="field"><label>Meta Keywords</label><textarea name="seo_meta_keywords" style="width:100%;min-height:70px;border:1px solid var(--border);border-radius:12px;padding:12px;"><?= htmlspecialchars($settings['seo_meta_keywords'] ?? '') ?></textarea></div>

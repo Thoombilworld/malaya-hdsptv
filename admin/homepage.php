@@ -35,7 +35,7 @@ hs_admin_shell_start('Homepage Manager – HDSPTV', 'Homepage Manager', 'homepag
   <h2>Homepage Section Controls</h2>
   <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if ($msg): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
-  <form method="post">
+  <form method="post" action="<?= hs_admin_url('homepage.php') ?>">
     <?= hs_csrf_input() ?>
     <label style="display:block;margin-bottom:10px;"><input type="checkbox" name="hp_show_breaking" <?= hp_checked($settings,'hp_show_breaking') ?>> Show Breaking Ticker</label>
     <label style="display:block;margin-bottom:10px;"><input type="checkbox" name="hp_show_featured" <?= hp_checked($settings,'hp_show_featured') ?>> Show Featured Stories</label>

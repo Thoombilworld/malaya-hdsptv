@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 mysqli_query($db, "DELETE FROM hs_post_tags WHERE post_id=".$id);
             }
-            header('Location: ' . hs_base_url('admin/content/articles.php'));
+            header('Location: ' . hs_admin_content_url('articles.php'));
             exit;
         }
     }
@@ -101,7 +101,7 @@ hs_admin_shell_start('Edit Article – HDSPTV', 'Edit News', 'content');
 <section class="card" style="max-width:980px;">
   <h2>Edit Article</h2>
   <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" action="<?= hs_admin_content_url('article_edit.php', 'id='.(int)$id) ?>" enctype="multipart/form-data">
     <?= hs_csrf_input() ?>
     <div class="field"><label>Title</label><input type="text" name="title" required value="<?= htmlspecialchars($post['title']) ?>"></div>
     <div class="field"><label>Slug</label><input type="text" name="slug" value="<?= htmlspecialchars($post['slug']) ?>"></div>

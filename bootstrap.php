@@ -203,6 +203,23 @@ function hs_search_url($query = '') {
     return hs_base_url('search/' . rawurlencode($query));
 }
 
+function hs_admin_url($path = 'index.php', $query = '') {
+    $url = hs_base_url('admin/' . ltrim((string)$path, '/'));
+    $query = ltrim((string)$query, '?');
+    return $query !== '' ? ($url . '?' . $query) : $url;
+}
+
+function hs_admin_content_url($path = 'index.php', $query = '') {
+    $url = hs_base_url('admin/content/' . ltrim((string)$path, '/'));
+    $query = ltrim((string)$query, '?');
+    return $query !== '' ? ($url . '?' . $query) : $url;
+}
+
+function hs_admin_redirect($path = 'index.php', $query = '') {
+    header('Location: ' . hs_admin_url($path, $query));
+    exit;
+}
+
 function hs_auto_meta($type, array $payload, array $settings = []) {
     $site = $settings['site_title'] ?? HS_APP_NAME;
     $descDefault = $settings['seo_meta_description'] ?? ($settings['tagline'] ?? '');
@@ -498,7 +515,7 @@ function hs_require_admin() {
         exit;
     }
     if (!hs_is_admin_logged_in()) {
-        header('Location: ' . hs_base_url('admin/login.php'));
+        header('Location: ' . hs_admin_url('login.php'));
         exit;
     }
 }

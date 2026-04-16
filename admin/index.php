@@ -43,10 +43,10 @@ hs_admin_shell_start('Admin Dashboard – HDSPTV', 'Dashboard', 'dashboard');
       <span class="badge badge-success">Published: <?= $publishedTotal ?></span>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
-      <a class="btn btn-secondary" href="<?= hs_base_url('admin/content/articles.php') ?>">Edit</a>
-      <a class="btn btn-secondary" href="<?= hs_base_url('admin/content/articles.php?status=scheduled') ?>">Pause</a>
-      <a class="btn btn-secondary" href="<?= hs_base_url('admin/content/article_add.php') ?>">Replace</a>
-      <a class="btn btn-primary" href="<?= hs_base_url('admin/social_dispatch.php') ?>">Push Notification</a>
+      <a class="btn btn-secondary" href="<?= hs_admin_content_url('articles.php') ?>">Edit</a>
+      <a class="btn btn-secondary" href="<?= hs_admin_content_url('articles.php', 'status=scheduled') ?>">Pause</a>
+      <a class="btn btn-secondary" href="<?= hs_admin_content_url('article_add.php') ?>">Replace</a>
+      <a class="btn btn-primary" href="<?= hs_admin_url('social_dispatch.php') ?>">Push Notification</a>
     </div>
   </article>
 
@@ -56,9 +56,9 @@ hs_admin_shell_start('Admin Dashboard – HDSPTV', 'Dashboard', 'dashboard');
     <p class="muted">Current Program: Newsroom Bulletin</p>
     <p class="muted">Next Program: Regional Roundup</p>
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
-      <a class="btn btn-primary" href="<?= hs_base_url('admin/homepage.php') ?>">Start Live</a>
-      <a class="btn btn-secondary" href="<?= hs_base_url('admin/homepage.php') ?>">Stop Live</a>
-      <a class="btn btn-secondary" href="<?= hs_base_url('admin/homepage.php') ?>">Switch Feed</a>
+      <a class="btn btn-primary" href="<?= hs_admin_url('homepage.php') ?>">Start Live</a>
+      <a class="btn btn-secondary" href="<?= hs_admin_url('homepage.php') ?>">Stop Live</a>
+      <a class="btn btn-secondary" href="<?= hs_admin_url('homepage.php') ?>">Switch Feed</a>
     </div>
   </article>
 </section>
@@ -92,9 +92,9 @@ hs_admin_shell_start('Admin Dashboard – HDSPTV', 'Dashboard', 'dashboard');
               </td>
               <td class="muted"><?= htmlspecialchars($story['created_at'] ?? '-') ?></td>
               <td class="workflow-actions">
-                <a href="<?= hs_base_url('admin/content/articles.php') ?>">Edit</a>
-                <a href="<?= hs_base_url('admin/content/articles.php?status=draft') ?>">Review</a>
-                <a href="<?= hs_base_url('admin/content/articles.php?status=published') ?>">Publish</a>
+                <a href="<?= hs_admin_content_url('articles.php') ?>">Edit</a>
+                <a href="<?= hs_admin_content_url('articles.php', 'status=draft') ?>">Review</a>
+                <a href="<?= hs_admin_content_url('articles.php', 'status=published') ?>">Publish</a>
               </td>
             </tr>
           <?php endforeach; ?>

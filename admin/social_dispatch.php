@@ -79,11 +79,11 @@ hs_admin_shell_start('Social Dispatcher – HDSPTV', 'Social Dispatcher', 'socia
 <section class="card" style="max-width:940px;">
   <h2>Dispatch Published Story</h2>
   <p class="muted">Send published articles to your external webhook automation pipeline.</p>
-  <p><a class="btn btn-secondary" href="<?= hs_base_url('admin/social.php') ?>">Back to Social Settings</a></p>
+  <p><a class="btn btn-secondary" href="<?= hs_admin_url('social.php') ?>">Back to Social Settings</a></p>
   <?php if ($message): ?><div class="badge badge-success" style="margin-bottom:12px;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
   <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-  <form method="post">
+  <form method="post" action="<?= hs_admin_url('social_dispatch.php') ?>">
     <?= hs_csrf_input() ?>
     <div class="field">
       <label for="post_id">Select Published Article</label>

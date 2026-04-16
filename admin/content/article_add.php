@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($tags_raw !== '') {
                 hs_content_sync_tags($db, (int)$post_id, $tags_raw);
             }
-            header('Location: ' . hs_base_url('admin/content/articles.php'));
+            header('Location: ' . hs_admin_content_url('articles.php'));
             exit;
         }
     }
@@ -71,7 +71,7 @@ hs_admin_shell_start('Add Article – HDSPTV', 'Create News', 'content');
 <section class="card" style="max-width:980px;">
   <h2>Add Article</h2>
   <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" action="<?= hs_admin_content_url('article_add.php') ?>" enctype="multipart/form-data">
     <?= hs_csrf_input() ?>
     <div class="field"><label>Title</label><input type="text" name="title" required></div>
     <div class="field"><label>Slug (optional)</label><input type="text" name="slug"></div>

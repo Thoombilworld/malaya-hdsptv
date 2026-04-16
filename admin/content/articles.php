@@ -31,7 +31,7 @@ hs_admin_shell_start('Articles – HDSPTV', 'All News', 'content');
 ?>
 
 <section class="card" style="margin-bottom:24px;">
-  <form method="get" style="display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;">
+  <form method="get" action="<?= hs_admin_content_url('articles.php') ?>" style="display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;">
     <div class="field" style="margin:0;">
       <label for="q">Search headline</label>
       <input id="q" type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search by title">
@@ -46,7 +46,7 @@ hs_admin_shell_start('Articles – HDSPTV', 'All News', 'content');
       </select>
     </div>
     <button class="btn btn-secondary" type="submit">Filter</button>
-    <a class="btn btn-primary" href="<?= hs_base_url('admin/content/article_add.php') ?>">Create News</a>
+    <a class="btn btn-primary" href="<?= hs_admin_content_url('article_add.php') ?>">Create News</a>
   </form>
 </section>
 
@@ -90,9 +90,9 @@ hs_admin_shell_start('Articles – HDSPTV', 'All News', 'content');
             </td>
             <td><?= htmlspecialchars($p['created_at']) ?></td>
             <td>
-              <a href="<?= hs_base_url('admin/content/article_edit.php?id='.(int)$p['id']) ?>">Edit</a>
+              <a href="<?= hs_admin_content_url('article_edit.php', 'id='.(int)$p['id']) ?>">Edit</a>
               ·
-              <a href="<?= hs_base_url('admin/content/article_delete.php?id='.(int)$p['id']) ?>" onclick="return confirm('Delete this article?')">Delete</a>
+              <a href="<?= hs_admin_content_url('article_delete.php', 'id='.(int)$p['id']) ?>" onclick="return confirm('Delete this article?')">Delete</a>
             </td>
           </tr>
         <?php endforeach; ?>

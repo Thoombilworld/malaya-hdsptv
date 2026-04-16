@@ -34,7 +34,7 @@ if (isset($_GET['delete'])) {
     if ($id > 0) {
         mysqli_query($db, "DELETE FROM hs_categories WHERE id=".$id." LIMIT 1");
     }
-    header('Location: ' . hs_base_url('admin/content/categories.php'));
+    header('Location: ' . hs_admin_content_url('categories.php'));
     exit;
 }
 
@@ -50,7 +50,7 @@ hs_admin_shell_start('Categories – HDSPTV', 'Categories', 'content');
   <article class="card col-4 col-md-12">
     <h2>Add Category</h2>
     <?php if ($error): ?><div class="error-box"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <form method="post">
+    <form method="post" action="<?= hs_admin_content_url('categories.php') ?>">
     <?= hs_csrf_input() ?>
       <div class="field">
         <label>Name</label>
@@ -86,7 +86,7 @@ hs_admin_shell_start('Categories – HDSPTV', 'Categories', 'content');
               <td><?= htmlspecialchars($c['name']) ?></td>
               <td><?= htmlspecialchars($c['slug']) ?></td>
               <td><?= htmlspecialchars($parentName) ?></td>
-              <td><a href="<?= hs_base_url('admin/content/categories.php?delete='.(int)$c['id']) ?>" onclick="return confirm('Delete this category?')">Delete</a></td>
+              <td><a href="<?= hs_admin_content_url('categories.php', 'delete='.(int)$c['id']) ?>" onclick="return confirm('Delete this category?')">Delete</a></td>
             </tr>
           <?php endforeach; ?>
         </tbody>
