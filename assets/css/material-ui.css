@@ -71,10 +71,9 @@ textarea {
 }
 
 .admin-sidebar,
-.admin-topbar,
-.site-header,
-.top-strip {
+.admin-topbar {
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 @media (max-width: 1024px) {
