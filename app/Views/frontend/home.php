@@ -125,7 +125,7 @@
       </form>
       <a href="<?= hs_base_url('auth/login.php') ?>"><?= htmlspecialchars(hs_t('login')) ?></a>
       <a href="<?= hs_base_url('auth/register.php') ?>"><?= htmlspecialchars(hs_t('register')) ?></a>
-      <a href="<?= hs_base_url('admin/login.php') ?>">Admin</a>
+      <a href="<?= hs_admin_url('login.php') ?>">Admin</a>
     </div>
   </div>
 </header>
