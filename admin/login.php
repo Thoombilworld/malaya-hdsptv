@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label style="display:flex; align-items:center; gap:8px; font-size:14px; color:#374151;">
             <input type="checkbox" name="remember" value="1"> Remember me
           </label>
-          <a href="<?= hs_base_url('auth/forgot.php') ?>" style="font-size:14px; color:#2563EB;">Forgot password?</a>
+          <a href="<?= hs_route('auth_forgot') ?>" style="font-size:14px; color:#2563EB;">Forgot password?</a>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr auto; gap:10px;">

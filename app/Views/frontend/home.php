@@ -90,7 +90,7 @@
 
 <header class="site-header sticky-header">
   <div class="container nav-shell">
-    <a class="brand" href="<?= hs_base_url('/') ?>">
+    <a class="brand" href="<?= hs_route('home') ?>">
       <span class="brand-mark">H</span>
       <span>
         <strong><?= htmlspecialchars($settings['site_title'] ?? 'HDSPTV') ?></strong>
@@ -100,22 +100,22 @@
     <button class="mobile-menu-btn" data-nav-toggle aria-controls="top-nav" aria-expanded="false">Menu</button>
 
     <nav class="top-nav" id="top-nav" data-top-nav aria-label="Main navigation">
-      <a href="<?= hs_base_url('/') ?>"><?= htmlspecialchars(hs_t('home')) ?></a>
+      <a href="<?= hs_route('home') ?>"><?= htmlspecialchars(hs_t('home')) ?></a>
       <a href="<?= hs_category_url('india') ?>"><?= htmlspecialchars(hs_t('india')) ?></a>
       <a href="<?= hs_category_url('gcc') ?>"><?= htmlspecialchars(hs_t('gcc')) ?></a>
       <a href="<?= hs_category_url('world') ?>"><?= htmlspecialchars(hs_t('world')) ?></a>
       <a href="<?= hs_category_url('sports') ?>"><?= htmlspecialchars(hs_t('sports')) ?></a>
-      <a class="live-btn" href="<?= hs_base_url('live') ?>"><?= htmlspecialchars(hs_t('live_tv')) ?></a>
+      <a class="live-btn" href="<?= hs_route('live') ?>"><?= htmlspecialchars(hs_t('live_tv')) ?></a>
     </nav>
 
-    <form class="search-inline" method="get" action="<?= hs_base_url('search') ?>">
+    <form class="search-inline" method="get" action="<?= hs_route('search') ?>">
       <input type="text" name="q" placeholder="<?= htmlspecialchars(hs_t('search_stories')) ?>" aria-label="<?= htmlspecialchars(hs_t('search_stories')) ?>">
     </form>
 
     <div class="header-utils">
       <button class="install-app-btn" data-install-app hidden><?= htmlspecialchars(hs_t('install_app')) ?></button>
       <button class="install-app-btn" data-enable-notifications hidden>Enable Alerts</button>
-      <form method="get" class="lang-form" action="<?= hs_base_url('/') ?>">
+      <form method="get" class="lang-form" action="<?= hs_route('home') ?>">
         <label class="sr-only" for="language-picker">Language</label>
         <select id="language-picker" name="lang" aria-label="Language selector" class="lang-selector" onchange="this.form.submit()">
           <?php foreach (hs_available_locales() as $code => $label): ?>
@@ -123,9 +123,9 @@
           <?php endforeach; ?>
         </select>
       </form>
-      <a href="<?= hs_base_url('auth/login.php') ?>"><?= htmlspecialchars(hs_t('login')) ?></a>
-      <a href="<?= hs_base_url('auth/register.php') ?>"><?= htmlspecialchars(hs_t('register')) ?></a>
-      <a href="<?= hs_admin_url('login.php') ?>">Admin</a>
+      <a href="<?= hs_route('auth_login') ?>"><?= htmlspecialchars(hs_t('login')) ?></a>
+      <a href="<?= hs_route('auth_register') ?>"><?= htmlspecialchars(hs_t('register')) ?></a>
+      <a href="<?= hs_route('admin_login') ?>">Admin</a>
     </div>
   </div>
 </header>
@@ -206,13 +206,13 @@
       <section class="live-promo">
         <h2>Watch HDSPTV Live</h2>
         <p>Follow live programs, breaking updates, and rolling coverage from our international desk.</p>
-        <a class="btn btn-primary" href="<?= hs_base_url('live') ?>">Open Live TV</a>
+        <a class="btn btn-primary" href="<?= hs_route('live') ?>">Open Live TV</a>
       </section>
     </section>
 
     <aside class="col-4 col-md-12 stack-24">
       <section class="panel">
-        <div class="section-head"><h2><a href="<?= hs_base_url('trending') ?>">Trending Now</a></h2></div>
+        <div class="section-head"><h2><a href="<?= hs_route('trending') ?>">Trending Now</a></h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeTrending, 0, 6) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a><div class="meta"><?= $formatDate($item) ?></div></li>
@@ -230,7 +230,7 @@
       </section>
 
       <section class="panel">
-        <div class="section-head"><h2><a href="<?= hs_base_url('video') ?>">Video News</a></h2></div>
+        <div class="section-head"><h2><a href="<?= hs_route('video') ?>">Video News</a></h2></div>
         <ul class="list-clean">
           <?php foreach (array_slice($safeVideos, 0, 4) as $item): ?>
             <li><a href="<?= $articleLink($item) ?>"><?= htmlspecialchars($item['title']) ?></a></li>
@@ -256,7 +256,7 @@
       <strong><?= htmlspecialchars($settings['site_title'] ?? 'HDSPTV') ?></strong>
       <p class="meta"><?= htmlspecialchars($settings['tagline'] ?? 'International newsroom coverage across India, GCC, Kerala and beyond.') ?></p>
     </div>
-    <div class="footer-links"><a href="<?= hs_base_url('about') ?>">About</a><a href="<?= hs_base_url('contact') ?>">Contact</a><a href="<?= hs_base_url('profile') ?>">Profile</a></div>
+    <div class="footer-links"><a href="<?= hs_route('about') ?>">About</a><a href="<?= hs_route('contact') ?>">Contact</a><a href="<?= hs_route('profile') ?>">Profile</a></div>
   </div>
 </footer>
 </body>

@@ -183,24 +183,89 @@ function hs_base_url($path = '') {
     return HS_BASE_URL . ltrim($path, '/');
 }
 
+function hs_routes(): array {
+    return [
+        'home' => '/',
+        'about' => 'about',
+        'contact' => 'contact',
+        'breaking' => 'breaking',
+        'trending' => 'trending',
+        'video' => 'video',
+        'gallery' => 'gallery',
+        'live' => 'live',
+        'profile' => 'profile',
+        'saved' => 'saved',
+        'notifications' => 'notifications',
+        'search' => 'search',
+        'search_query' => 'search/:query',
+        'post' => 'post/:slug',
+        'category' => 'category/:slug',
+        'tag' => 'tag/:slug',
+        'auth_login' => 'auth/login.php',
+        'auth_register' => 'auth/register.php',
+        'auth_logout' => 'auth/logout.php',
+        'auth_forgot' => 'auth/forgot.php',
+        'auth_reset' => 'auth/reset.php',
+        'admin_index' => 'admin/index.php',
+        'admin_login' => 'admin/login.php',
+        'admin_logout' => 'admin/logout.php',
+        'admin_homepage' => 'admin/homepage.php',
+        'admin_ads' => 'admin/ads.php',
+        'admin_seo' => 'admin/seo.php',
+        'admin_social' => 'admin/social.php',
+        'admin_social_dispatch' => 'admin/social_dispatch.php',
+        'admin_users' => 'admin/users.php',
+        'admin_logs' => 'admin/logs.php',
+        'admin_content_index' => 'admin/content/index.php',
+        'admin_content_articles' => 'admin/content/articles.php',
+        'admin_content_article_add' => 'admin/content/article_add.php',
+        'admin_content_article_edit' => 'admin/content/article_edit.php',
+        'admin_content_article_delete' => 'admin/content/article_delete.php',
+        'admin_content_categories' => 'admin/content/categories.php',
+        'admin_content_tags' => 'admin/content/tags.php',
+    ];
+}
+
+function hs_route(string $name, array $params = [], array $query = []): string {
+    $routes = hs_routes();
+    $path = $routes[$name] ?? '';
+    if ($path === '') {
+        return hs_base_url('/');
+    }
+    foreach ($params as $k => $v) {
+        $path = str_replace(':' . $k, rawurlencode((string)$v), $path);
+    }
+    $path = preg_replace('/:[A-Za-z0-9_]+/', '', $path);
+    $url = hs_base_url($path);
+    if (!empty($query)) {
+        $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($query);
+    }
+    return $url;
+}
+
+function hs_redirect_route(string $name, array $params = [], array $query = []): void {
+    header('Location: ' . hs_route($name, $params, $query));
+    exit;
+}
+
 function hs_post_url($slug) {
-    return hs_base_url('post/' . rawurlencode((string)$slug));
+    return hs_route('post', ['slug' => (string)$slug]);
 }
 
 function hs_category_url($slug) {
-    return hs_base_url('category/' . rawurlencode((string)$slug));
+    return hs_route('category', ['slug' => (string)$slug]);
 }
 
 function hs_tag_url($slug) {
-    return hs_base_url('tag/' . rawurlencode((string)$slug));
+    return hs_route('tag', ['slug' => (string)$slug]);
 }
 
 function hs_search_url($query = '') {
     $query = trim((string)$query);
     if ($query === '') {
-        return hs_base_url('search');
+        return hs_route('search');
     }
-    return hs_base_url('search/' . rawurlencode($query));
+    return hs_route('search_query', ['query' => $query]);
 }
 
 function hs_admin_url($path = 'index.php', $query = '') {
