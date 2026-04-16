@@ -450,11 +450,13 @@ function hs_csrf_token() {
 }
 
 function hs_csrf_input() {
-    return '<input type="hidden" name="_csrf" value="' . htmlspecialchars(hs_csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+    $token = htmlspecialchars(hs_csrf_token(), ENT_QUOTES, 'UTF-8');
+    return '<input type="hidden" name="_csrf" value="' . $token . '">'
+        . '<input type="hidden" name="csrf_token" value="' . $token . '">';
 }
 
 function hs_csrf_validate() {
-    $token = $_POST['_csrf'] ?? '';
+    $token = $_POST['_csrf'] ?? ($_POST['csrf_token'] ?? '');
     $valid = !empty($_SESSION['hs_csrf_token']) && hash_equals($_SESSION['hs_csrf_token'], $token);
     if (!$valid) {
         http_response_code(422);
