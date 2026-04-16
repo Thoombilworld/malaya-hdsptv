@@ -12,6 +12,135 @@ function err(array &$errors, string $message): void
     $errors[] = $message;
 }
 
+function normalize_path(string $path): string
+{
+    $path = str_replace('\\', '/', $path);
+    $path = preg_replace('#/+#', '/', $path) ?? $path;
+    $segments = [];
+
+    foreach (explode('/', $path) as $segment) {
+        if ($segment === '' || $segment === '.') {
+            continue;
+        }
+        if ($segment === '..') {
+            array_pop($segments);
+            continue;
+        }
+        $segments[] = $segment;
+    }
+
+    return implode('/', $segments);
+}
+
+function should_skip_reference(string $value): bool
+{
+    $value = trim($value);
+    if ($value === '' || $value === '/' || $value[0] === '#') {
+        return true;
+    }
+
+    if (preg_match('#^(https?:)?//#i', $value) === 1) {
+        return true;
+    }
+
+    if (preg_match('#^(mailto:|tel:|javascript:|data:)#i', $value) === 1) {
+        return true;
+    }
+
+    if (str_contains($value, '<?') || str_contains($value, '?>')) {
+        return true;
+    }
+
+    if (str_contains($value, '{{') || str_contains($value, '}}')) {
+        return true;
+    }
+
+    if (str_contains($value, '{') || str_contains($value, '}')) {
+        return true;
+    }
+
+    if (str_contains($value, '$')) {
+        return true;
+    }
+
+    return false;
+}
+
+function clean_reference(string $value): string
+{
+    $value = trim($value);
+    $value = preg_replace('/[#?].*$/', '', $value) ?? $value;
+    return trim($value);
+}
+
+function candidate_paths(string $reference, string $sourceFile): array
+{
+    $reference = clean_reference($reference);
+    if ($reference === '') {
+        return [];
+    }
+
+    $baseDir = normalize_path(dirname($sourceFile));
+    $paths = [];
+
+    if ($reference[0] === '/') {
+        $paths[] = normalize_path(substr($reference, 1));
+    } else {
+        $paths[] = normalize_path(($baseDir === '.' ? '' : $baseDir . '/') . $reference);
+        $paths[] = normalize_path($reference);
+    }
+
+    return array_values(array_unique(array_filter($paths, static fn (string $p): bool => $p !== '')));
+}
+
+function path_exists_with_fallbacks(string $path): bool
+{
+    if ($path === '') {
+        return true;
+    }
+
+    if (is_file($path) || is_dir($path)) {
+        return true;
+    }
+
+    if (is_file($path . '.php')) {
+        return true;
+    }
+
+    if (is_file($path . '/index.php')) {
+        return true;
+    }
+
+    return false;
+}
+
+function collect_source_files(array $extensions): array
+{
+    $files = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator('.', FilesystemIterator::SKIP_DOTS)
+    );
+
+    foreach ($iterator as $item) {
+        if (!$item->isFile()) {
+            continue;
+        }
+
+        $path = str_replace('\\', '/', $item->getPathname());
+        if (str_starts_with($path, './.git/')) {
+            continue;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (in_array($ext, $extensions, true)) {
+            $files[] = ltrim($path, './');
+        }
+    }
+
+    sort($files);
+    return $files;
+}
+
 $requiredDirs = [
     'admin',
     'admin/content',
@@ -20,13 +149,17 @@ $requiredDirs = [
     'app/Views/frontend',
     'assets/css',
     'assets/js',
-    'install',
+    'assets/images/icons',
     'auth',
+    'config',
+    'install',
+    'tools',
     'writable/logs',
     'writable/uploads/images',
 ];
 
 $requiredFiles = [
+    '.htaccess',
     'bootstrap.php',
     'config/config.php',
     'index.php',
@@ -34,17 +167,22 @@ $requiredFiles = [
     'category.php',
     'tag.php',
     'search.php',
+    'about.php',
+    'contact.php',
+    'offline.html',
+    'manifest.webmanifest',
+    'service-worker.js',
     'admin/_layout.php',
     'admin/index.php',
     'admin/login.php',
     'admin/content/articles.php',
     'assets/css/style.css',
     'assets/js/pwa.js',
-    '.htaccess',
-    'manifest.webmanifest',
-    'service-worker.js',
+    'assets/images/icons/icon-192.svg',
+    'assets/images/icons/icon-512.svg',
     'install/index.php',
     'install/install.sql',
+    'tools/validate_hdsptv_integrity.php',
 ];
 
 foreach ($requiredDirs as $dir) {
@@ -61,46 +199,60 @@ foreach ($requiredFiles as $file) {
 
 require_once $root . '/bootstrap.php';
 $routes = function_exists('hs_routes') ? hs_routes() : [];
+$routeTargetCandidates = [];
+$virtualTargets = ['sitemap.xml', 'robots.txt'];
 
 if (empty($routes)) {
     err($errors, 'Route registry (hs_routes) is empty or unavailable.');
 } else {
     foreach ($routes as $name => $path) {
-        if (!is_string($path) || $path === '') {
+        if (!is_string($path) || trim($path) === '') {
             err($errors, "Route '{$name}' has invalid empty path.");
             continue;
         }
-        if (strpos($path, ':') !== false) {
+
+        $normalized = ltrim(trim($path), '/');
+        $normalized = preg_replace('/:[A-Za-z0-9_]+/', '', $normalized) ?? $normalized;
+        $normalized = trim((string) $normalized, '/');
+
+        if ($normalized !== '') {
+            $routeTargetCandidates[] = $normalized;
+        }
+
+        if (str_contains($path, ':')) {
             continue;
         }
-        if ($path === '/' || $path === '') {
+
+        if ($path === '/' || $normalized === '') {
             continue;
         }
-        $candidate = ltrim($path, '/');
-        if (is_file($candidate) || is_dir($candidate)) {
-            continue;
+
+        if (!path_exists_with_fallbacks($normalized)) {
+            err($errors, "Route '{$name}' points to non-existing path: {$path}");
         }
-        if (is_file($candidate . '.php')) {
-            continue;
-        }
-        err($errors, "Route '{$name}' points to non-existing path: {$path}");
     }
 }
 
-$sourceFiles = [];
-foreach (['php', 'js', 'css', 'html'] as $ext) {
-    $cmd = "find . -type f -name '*." . $ext . "' -not -path './.git/*'";
-    $list = trim((string)shell_exec($cmd));
-    if ($list === '') {
-        continue;
-    }
-    $sourceFiles = array_merge($sourceFiles, array_filter(explode("\n", $list)));
-}
+$routeTargetCandidates = array_values(array_unique($routeTargetCandidates));
 
-$routePattern = "/hs_route\\(['\\\"]([^'\\\"]+)['\\\"]/";
-$basePattern = "/hs_base_url\\(['\\\"]([^'\\\"]+)['\\\"]/";
-$adminPattern = "/hs_admin_url\\(['\\\"]([^'\\\"]*)['\\\"]/";
-$adminContentPattern = "/hs_admin_content_url\\(['\\\"]([^'\\\"]*)['\\\"]/";
+$sourceFiles = collect_source_files(['php', 'html', 'js', 'css']);
+
+$routePattern = "/hs_route\\(['\"]([^'\"]+)['\"]/";
+$basePattern = "/hs_base_url\\(['\"]([^'\"]+)['\"]/";
+$adminPattern = "/hs_admin_url\\(['\"]([^'\"]*)['\"]/";
+$adminContentPattern = "/hs_admin_content_url\\(['\"]([^'\"]*)['\"]/";
+
+$htmlReferencePatterns = [
+    '/(?:href|src|action|poster|data-src|data-href)\\s*=\\s*["\\\']([^"\\\']+)["\\\']/i',
+];
+
+$jsReferencePatterns = [
+    '/(?:fetch|register|importScripts)\\(\\s*["\\\']([^"\\\']+)["\\\']/i',
+];
+
+$cssReferencePatterns = [
+    '/url\\(\\s*["\\\']?([^"\\\')]+)["\\\']?\\s*\\)/i',
+];
 
 foreach ($sourceFiles as $file) {
     $content = @file_get_contents($file);
@@ -109,45 +261,49 @@ foreach ($sourceFiles as $file) {
         continue;
     }
 
-    if (preg_match_all($routePattern, $content, $m)) {
-        foreach ($m[1] as $routeName) {
+    if (preg_match_all($routePattern, $content, $matches)) {
+        foreach ($matches[1] as $routeName) {
             if (!isset($routes[$routeName])) {
                 err($errors, "{$file}: unknown route name '{$routeName}' in hs_route().");
             }
         }
     }
 
-    if (preg_match_all($basePattern, $content, $m)) {
-        foreach ($m[1] as $path) {
-            $path = ltrim($path, '/');
-            $path = preg_replace('/[#?].*$/', '', $path);
-            if ($path === '' || strpos($path, '{') !== false) {
+    if (preg_match_all($basePattern, $content, $matches)) {
+        foreach ($matches[1] as $path) {
+            if (should_skip_reference($path)) {
                 continue;
             }
-            if (preg_match('#^(https?:)?//#', $path)) {
-                continue;
+
+            $candidates = candidate_paths($path, $file);
+            $found = false;
+            foreach ($candidates as $candidate) {
+                $trimmed = trim($candidate, '/');
+                if (
+                    path_exists_with_fallbacks($candidate)
+                    || in_array($trimmed, $routeTargetCandidates, true)
+                    || in_array($trimmed, $virtualTargets, true)
+                ) {
+                    $found = true;
+                    break;
+                }
             }
-            if (is_file($path) || is_dir($path)) {
-                continue;
+
+            if (!$found) {
+                err($errors, "{$file}: unresolved hs_base_url path '{$path}'.");
             }
-            if (is_file($path . '.php')) {
-                continue;
-            }
-            if (preg_match('#^(search|post|category|tag|about|contact|breaking|trending|video|gallery|live|profile|saved|notifications|sitemap\.xml|robots\.txt)$#', $path)) {
-                continue;
-            }
-            err($errors, "{$file}: unresolved hs_base_url path '{$path}'.");
         }
     }
 
-    if (preg_match_all($adminPattern, $content, $m)) {
-        foreach ($m[1] as $path) {
+    if (preg_match_all($adminPattern, $content, $matches)) {
+        foreach ($matches[1] as $path) {
             $path = trim($path);
             if ($path === '') {
                 $path = 'index.php';
-            } elseif (strpos($path, '.') === false) {
+            } elseif (!str_contains($path, '.')) {
                 $path .= '.php';
             }
+
             $full = 'admin/' . ltrim($path, '/');
             if (!is_file($full)) {
                 err($errors, "{$file}: unresolved hs_admin_url path '{$full}'.");
@@ -155,26 +311,164 @@ foreach ($sourceFiles as $file) {
         }
     }
 
-    if (preg_match_all($adminContentPattern, $content, $m)) {
-        foreach ($m[1] as $path) {
+    if (preg_match_all($adminContentPattern, $content, $matches)) {
+        foreach ($matches[1] as $path) {
             $path = trim($path);
             if ($path === '') {
                 $path = 'index.php';
-            } elseif (strpos($path, '.') === false) {
+            } elseif (!str_contains($path, '.')) {
                 $path .= '.php';
             }
+
             $full = 'admin/content/' . ltrim($path, '/');
             if (!is_file($full)) {
                 err($errors, "{$file}: unresolved hs_admin_content_url path '{$full}'.");
             }
         }
     }
+
+    if (pathinfo($file, PATHINFO_EXTENSION) === 'php') {
+        continue;
+    }
+
+    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    $referencePatterns = [];
+    if ($extension === 'html') {
+        $referencePatterns = $htmlReferencePatterns;
+    } elseif ($extension === 'js') {
+        $referencePatterns = $jsReferencePatterns;
+    } elseif ($extension === 'css') {
+        $referencePatterns = $cssReferencePatterns;
+    }
+
+    foreach ($referencePatterns as $pattern) {
+        if (!preg_match_all($pattern, $content, $matches)) {
+            continue;
+        }
+
+        foreach ($matches[1] as $reference) {
+            if (should_skip_reference($reference)) {
+                continue;
+            }
+
+            $candidates = candidate_paths($reference, $file);
+            $found = false;
+            foreach ($candidates as $candidate) {
+                $trimmed = trim($candidate, '/');
+                if (
+                    path_exists_with_fallbacks($candidate)
+                    || in_array($trimmed, $routeTargetCandidates, true)
+                    || in_array($trimmed, $virtualTargets, true)
+                ) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                err($errors, "{$file}: unresolved static reference '{$reference}'.");
+            }
+        }
+    }
 }
+
+$manifestPath = 'manifest.webmanifest';
+if (is_file($manifestPath)) {
+    $manifest = json_decode((string) file_get_contents($manifestPath), true);
+    if (!is_array($manifest)) {
+        err($errors, 'manifest.webmanifest is not valid JSON.');
+    } else {
+        foreach (['start_url', 'scope'] as $key) {
+            if (empty($manifest[$key]) || !is_string($manifest[$key])) {
+                continue;
+            }
+
+            $reference = $manifest[$key];
+            if (should_skip_reference($reference)) {
+                continue;
+            }
+
+            $candidates = candidate_paths($reference, $manifestPath);
+            $found = false;
+            foreach ($candidates as $candidate) {
+                $trimmed = trim($candidate, '/');
+                if (
+                    path_exists_with_fallbacks($candidate)
+                    || in_array($trimmed, $routeTargetCandidates, true)
+                    || in_array($trimmed, $virtualTargets, true)
+                ) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                err($errors, "manifest.webmanifest: unresolved {$key} '{$reference}'.");
+            }
+        }
+
+        if (!empty($manifest['icons']) && is_array($manifest['icons'])) {
+            foreach ($manifest['icons'] as $icon) {
+                if (!is_array($icon) || empty($icon['src']) || !is_string($icon['src'])) {
+                    err($errors, 'manifest.webmanifest: icon entry missing valid src.');
+                    continue;
+                }
+
+                $candidates = candidate_paths($icon['src'], $manifestPath);
+                $found = false;
+                foreach ($candidates as $candidate) {
+                    if (path_exists_with_fallbacks($candidate)) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    err($errors, "manifest.webmanifest: unresolved icon src '{$icon['src']}'.");
+                }
+            }
+        }
+    }
+}
+
+$swPath = 'service-worker.js';
+if (is_file($swPath)) {
+    $swContent = (string) file_get_contents($swPath);
+    if (preg_match('/STATIC_ASSETS\\s*=\\s*\\[(.*?)\\];/s', $swContent, $matches)) {
+        preg_match_all('/["\\\']([^"\\\']+)["\\\']/', $matches[1], $assetMatches);
+        foreach ($assetMatches[1] as $assetPath) {
+            if (should_skip_reference($assetPath)) {
+                continue;
+            }
+
+            $candidates = candidate_paths($assetPath, $swPath);
+            $found = false;
+            foreach ($candidates as $candidate) {
+                $trimmed = trim($candidate, '/');
+                if (
+                    path_exists_with_fallbacks($candidate)
+                    || in_array($trimmed, $routeTargetCandidates, true)
+                    || in_array($trimmed, $virtualTargets, true)
+                ) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                err($errors, "service-worker.js: unresolved STATIC_ASSETS entry '{$assetPath}'.");
+            }
+        }
+    } else {
+        err($errors, 'service-worker.js: STATIC_ASSETS array not found.');
+    }
+}
+
+$errors = array_values(array_unique($errors));
+sort($errors);
 
 if (!empty($errors)) {
     fwrite(STDERR, "HDSPTV integrity validation failed:\n");
-    foreach ($errors as $e) {
-        fwrite(STDERR, " - {$e}\n");
+    foreach ($errors as $error) {
+        fwrite(STDERR, " - {$error}\n");
     }
     exit(1);
 }
