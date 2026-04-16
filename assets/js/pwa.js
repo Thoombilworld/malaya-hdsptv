@@ -1,7 +1,26 @@
 (function () {
+  function resolveServiceWorkerUrl() {
+    var current = document.currentScript;
+    if (current && current.src) {
+      try {
+        var scriptUrl = new URL(current.src, window.location.href);
+        var basePath = scriptUrl.pathname.replace(/\/assets\/js\/pwa\.js$/, '/');
+        return basePath + 'service-worker.js';
+      } catch (e) {
+        // Fallback below
+      }
+    }
+    var path = window.location.pathname || '/';
+    var segments = path.split('/').filter(Boolean);
+    if (segments.length > 0) {
+      segments.pop();
+    }
+    return '/' + (segments.length ? segments.join('/') + '/' : '') + 'service-worker.js';
+  }
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/service-worker.js').catch(function () {
+      navigator.serviceWorker.register(resolveServiceWorkerUrl()).catch(function () {
         // Ignore registration errors in unsupported environments.
       });
     });
