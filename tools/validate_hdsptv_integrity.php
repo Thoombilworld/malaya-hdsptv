@@ -85,6 +85,7 @@ function candidate_paths(string $reference, string $sourceFile): array
 
     if ($reference[0] === '/') {
         $paths[] = normalize_path(substr($reference, 1));
+        $paths[] = normalize_path(($baseDir === '.' ? '' : $baseDir . '/') . ltrim($reference, '/'));
     } else {
         $paths[] = normalize_path(($baseDir === '.' ? '' : $baseDir . '/') . $reference);
         $paths[] = normalize_path($reference);
@@ -129,6 +130,21 @@ function reference_resolves(string $reference, string $sourceFile, array $routeT
     }
 
     return false;
+}
+
+function looks_like_path_reference(string $reference, array $routeTargetCandidates, array $virtualTargets): bool
+{
+    $clean = clean_reference($reference);
+    if ($clean === '') {
+        return false;
+    }
+
+    if (str_contains($clean, '/') || str_contains($clean, '.')) {
+        return true;
+    }
+
+    return in_array(trim($clean, '/'), $routeTargetCandidates, true)
+        || in_array(trim($clean, '/'), $virtualTargets, true);
 }
 
 function collect_source_files(array $extensions): array
@@ -287,6 +303,11 @@ $cssReferencePatterns = [
     '/url\\(\\s*["\\\']?([^"\\\')]+)["\\\']?\\s*\\)/i',
 ];
 
+$includePatterns = [
+    '/(?:require|require_once|include|include_once)\\s+__DIR__\\s*\\.\\s*[\'"]([^\'"]+)[\'"]/i',
+    '/(?:require|require_once|include|include_once)\\s*[\'"]([^\'"]+)[\'"]/i',
+];
+
 foreach ($sourceFiles as $file) {
     $content = @file_get_contents($file);
     if ($content === false) {
@@ -347,12 +368,34 @@ foreach ($sourceFiles as $file) {
     }
 
     if (pathinfo($file, PATHINFO_EXTENSION) === 'php') {
-        continue;
+        foreach ($includePatterns as $pattern) {
+            if (!preg_match_all($pattern, $content, $matches)) {
+                continue;
+            }
+
+            foreach ($matches[1] as $includePath) {
+                if (should_skip_reference($includePath)) {
+                    continue;
+                }
+
+                $resolved = false;
+                foreach (candidate_paths($includePath, $file) as $candidate) {
+                    if (path_exists_with_fallbacks($candidate)) {
+                        $resolved = true;
+                        break;
+                    }
+                }
+
+                if (!$resolved) {
+                    err($errors, "{$file}: unresolved include/require path '{$includePath}'.");
+                }
+            }
+        }
     }
 
     $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
     $referencePatterns = [];
-    if ($extension === 'html') {
+    if ($extension === 'html' || $extension === 'php') {
         $referencePatterns = $htmlReferencePatterns;
     } elseif ($extension === 'js') {
         $referencePatterns = $jsReferencePatterns;
@@ -367,6 +410,9 @@ foreach ($sourceFiles as $file) {
 
         foreach ($matches[1] as $reference) {
             if (should_skip_reference($reference)) {
+                continue;
+            }
+            if (!looks_like_path_reference($reference, $routeTargetCandidates, $virtualTargets)) {
                 continue;
             }
 
