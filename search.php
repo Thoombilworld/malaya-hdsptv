@@ -1,0 +1,381 @@
+
+<?php
+require __DIR__ . '/bootstrap.php';
+
+$settings = hs_settings();
+$db = hs_db();
+
+$q = urldecode(trim($_GET['q'] ?? ''));
+$posts = [];
+
+if ($q !== '') {
+    $like = '%' . $q . '%';
+    $stmt = mysqli_prepare($db, "SELECT p.*, c.name AS category_name
+                                 FROM hs_posts p
+                                 LEFT JOIN hs_categories c ON c.id = p.category_id
+                                 WHERE p.status='published'
+                                   AND (p.title LIKE ? OR p.content LIKE ? OR p.excerpt LIKE ?)
+                                 ORDER BY p.created_at DESC
+                                 LIMIT 60");
+    mysqli_stmt_bind_param($stmt, 'sss', $like, $like, $like);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    if ($res) {
+        while ($row = mysqli_fetch_assoc($res)) {
+            $posts[] = $row;
+        }
+    }
+}
+
+function hs_post_date_local($p) {
+    return !empty($p['created_at']) ? date('M j, Y', strtotime($p['created_at'])) : '';
+}
+
+$site_title = $settings['site_title'] ?? 'NEWS HDSPTV';
+$meta = hs_auto_meta('search', ['query' => $q], $settings);
+$page_title = $meta['title'];
+$meta_desc = $meta['desc'];
+$meta_keys = $meta['keywords'];
+$canonical = hs_search_url($q);
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title><?= htmlspecialchars($page_title) ?></title>
+  <meta name="description" content="<?= htmlspecialchars($meta_desc) ?>">
+  <meta name="keywords" content="<?= htmlspecialchars($meta_keys) ?>">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="<?= htmlspecialchars($canonical) ?>">
+  <?= hs_hreflang_links($q !== '' ? ('search/' . rawurlencode($q)) : 'search') ?>
+  <link rel="stylesheet" href="<?= hs_base_url('assets/css/style.css') ?>">
+  <?= hs_pwa_head_tags() ?>
+  <script defer src="<?= hs_base_url('assets/js/pwa.js') ?>"></script>
+  <style>
+    :root {
+      --primary: #D60000;
+      --dark: #111111;
+      --navy: #0B1220;
+      --bg: #F6F7FB;
+      --card: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #111111;
+      --text-muted: #6B7280;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: #111827;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #E5E7EB;
+      padding: 8px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .top-left {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .logo-link {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:inherit;
+      text-decoration:none;
+    }
+    .logo-link:hover {
+      text-decoration:none;
+      color:var(--primary);
+    }
+
+    .logo-mark {
+      width:32px;
+      height:32px;
+      border-radius:14px;
+      background: var(--navy);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      font-size:16px;
+      color:#FFFFFF;
+      box-shadow:0 10px 25px rgba(15,23,42,0.6);
+    }
+
+    .logo-text {
+      display:flex;
+      flex-direction:column;
+    }
+
+    .logo-text-main {
+      font-weight:800;
+      letter-spacing:.18em;
+      font-size:13px;
+    }
+
+    .logo-text-tag {
+      font-size:11px;
+      color:#374151;
+      opacity:.85;
+    }
+
+    .nav-main {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+    .nav-main a {
+      color:#374151;
+      padding:4px 8px;
+      border-radius:999px;
+    }
+    .nav-main a:hover {
+      background:#F3F4F6;
+      color:var(--primary);
+      text-decoration:none;
+    }
+
+    .nav-search {
+      margin-left:auto;
+      margin-right:12px;
+      margin-top:4px;
+    }
+    .nav-search input[type="text"] {
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.9);
+      font-size:12px;
+      background:#FFFFFF;
+      color:#111827;
+      min-width:200px;
+    }
+    .nav-search input[type="text"]::placeholder {
+      color:#6B7280;
+    }
+    .nav-search button { display:none; }
+
+    .user-bar {
+      font-size:11px;
+      color:#374151;
+      text-align:right;
+    }
+    .user-bar a { color:var(--primary); }
+
+    .page {
+      width:100%;
+      min-height:100vh;
+      padding:18px 12px 32px;
+      box-sizing:border-box;
+    }
+
+    .layout-search {
+      max-width:1160px;
+      margin:0 auto;
+    }
+
+    .search-header {
+      margin-bottom:14px;
+    }
+    .search-title {
+      font-size:20px;
+      font-weight:700;
+    }
+    .search-sub {
+      font-size:12px;
+      color:#374151;
+      margin-top:4px;
+    }
+
+    .result-list {
+      margin-top:16px;
+      display:grid;
+      grid-template-columns: minmax(0,1.8fr) minmax(0,1.8fr);
+      gap:14px;
+    }
+    .result-card {
+      background:var(--card);
+      border-radius:14px;
+      box-shadow:0 10px 24px rgba(11,18,32,0.12);
+      color:#111827;
+      padding:10px 12px 12px;
+      display:flex;
+      gap:10px;
+    }
+    .result-thumb {
+      width:96px;
+      height:72px;
+      background:#E5E7EB;
+      border-radius:10px;
+      overflow:hidden;
+      flex-shrink:0;
+    }
+    .result-thumb img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .result-main {
+      font-size:14px;
+    }
+    .result-kicker {
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+      color:#6B7280;
+      margin-bottom:3px;
+    }
+    .result-title {
+      font-weight:700;
+      color:#111827;
+      margin-bottom:4px;
+    }
+    .result-title a { color:#111827; }
+    .result-title a:hover { color:var(--primary); text-decoration:none; }
+    .result-meta {
+      font-size:11px;
+      color:#6B7280;
+    }
+    .result-excerpt {
+      font-size:13px;
+      color:#4B5563;
+      margin-top:4px;
+    }
+
+    @media (max-width:900px) {
+      .result-list {
+        grid-template-columns:minmax(0,1fr);
+      }
+    }
+    @media (max-width:640px) {
+      header { padding:8px 10px; }
+      .page { padding:14px 8px 24px; }
+      .nav-search {
+        width:100%;
+        margin:6px 0 0;
+      }
+      .nav-search input[type="text"] { width:100%; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="top-left">
+    <a href="<?= hs_base_url('index.php') ?>" class="logo-link">
+      <div class="logo-mark">H</div>
+      <div class="logo-text">
+        <div class="logo-text-main">NEWS HDSPTV</div>
+        <div class="logo-text-tag"><?= htmlspecialchars($settings['tagline'] ?? 'GCC • INDIA • KERALA • WORLD') ?></div>
+      </div>
+    </a>
+  </div>
+  <nav class="nav-main">
+    <a href="<?= hs_base_url('index.php#top') ?>">Home</a>
+    <a href="<?= hs_category_url('india') ?>">India</a>
+    <a href="<?= hs_category_url('gcc') ?>">GCC</a>
+    <a href="<?= hs_category_url('kerala') ?>">Kerala</a>
+    <a href="<?= hs_category_url('world') ?>">World</a>
+    <a href="<?= hs_category_url('sports') ?>">Sports</a>
+    <a href="<?= hs_category_url('entertainment') ?>">Entertainment</a>
+    <a href="<?= hs_category_url('business') ?>">Business</a>
+    <a href="<?= hs_category_url('technology') ?>">Technology</a>
+    <a href="<?= hs_category_url('lifestyle') ?>">Lifestyle</a>
+    <a href="<?= hs_category_url('health') ?>">Health</a>
+    <a href="<?= hs_category_url('travel') ?>">Travel</a>
+    <a href="<?= hs_category_url('auto') ?>">Auto</a>
+    <a href="<?= hs_category_url('opinion') ?>">Opinion</a>
+    <a href="<?= hs_category_url('politics') ?>">Politics</a>
+    <a href="<?= hs_category_url('crime') ?>">Crime</a>
+    <a href="<?= hs_category_url('education') ?>">Education</a>
+    <a href="<?= hs_category_url('religion') ?>">Religion</a>
+  </nav>
+  <form class="nav-search" action="<?= hs_base_url('search.php') ?>" method="get">
+    <input type="text" name="q" placeholder="Search news..." value="<?= htmlspecialchars($q) ?>">
+    <button type="submit">Search</button>
+  </form>
+  <div class="user-bar">
+    <?php $u = hs_current_user(); ?>
+    <?php if ($u): ?>
+      <?= htmlspecialchars($u['name']) ?>
+      <?php if (!empty($u['is_premium'])): ?> · <strong>Premium</strong><?php endif; ?>
+      · <a href="<?= hs_base_url('auth/logout.php') ?>">Logout</a>
+    <?php else: ?>
+      <a href="<?= hs_base_url('auth/login.php') ?>">Login</a> ·
+      <a href="<?= hs_base_url('auth/register.php') ?>">Register</a>
+    <?php endif; ?>
+  </div>
+</header>
+
+<main class="page">
+  <div class="layout-search">
+    <div class="search-header">
+      <div class="search-title">Search NEWS HDSPTV</div>
+      <div class="search-sub">
+        <?php if ($q === ''): ?>
+          Type a keyword above and press Enter.
+        <?php else: ?>
+          Showing results for "<strong><?= htmlspecialchars($q) ?></strong>" (<?= count($posts) ?> found)
+        <?php endif; ?>
+      </div>
+    </div>
+
+    <?php if ($q !== '' && !empty($posts)): ?>
+      <div class="result-list">
+        <?php foreach ($posts as $p): ?>
+          <article class="result-card">
+            <?php if (!empty($p['image_main'])): ?>
+              <div class="result-thumb">
+                <img src="<?= hs_base_url($p['image_main']) ?>" alt="<?= htmlspecialchars($p['title']) ?>">
+              </div>
+            <?php endif; ?>
+            <div class="result-main">
+              <div class="result-kicker">
+                <?= htmlspecialchars($p['category_name'] ?: 'News') ?>
+                <?php if (!empty($p['region']) && $p['region'] !== 'global'): ?>
+                  · <?= strtoupper(htmlspecialchars($p['region'])) ?>
+                <?php endif; ?>
+              </div>
+              <div class="result-title">
+                <a href="<?= hs_post_url($p['slug']) ?>"><?= htmlspecialchars($p['title']) ?></a>
+              </div>
+              <div class="result-meta">
+                <?= hs_post_date_local($p) ?>
+              </div>
+              <?php if (!empty($p['excerpt'])): ?>
+                <div class="result-excerpt">
+                  <?= htmlspecialchars(mb_substr($p['excerpt'], 0, 140)) ?><?= (mb_strlen($p['excerpt']) > 140 ? '…' : '') ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    <?php elseif ($q !== ''): ?>
+      <p>No results found.</p>
+    <?php endif; ?>
+  </div>
+</main>
+
+</body>
+</html>

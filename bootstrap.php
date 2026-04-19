@@ -1,0 +1,613 @@
+<?php
+require __DIR__ . '/config/config.php';
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (!function_exists('hs_is_admin_request')) {
+    function hs_is_admin_request() {
+        $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+        return strpos($script, '/admin/') !== false;
+    }
+}
+
+if (hs_is_admin_request() && (!defined('HS_INSTALLED') || !HS_INSTALLED)) {
+    header('Location: ' . rtrim(HS_BASE_URL, '/') . '/install/index.php');
+    exit;
+}
+
+function hs_available_locales() {
+    return [
+        'en' => 'English',
+        'ml' => 'മലയാളം',
+        'ar' => 'العربية',
+        'hi' => 'हिन्दी',
+    ];
+}
+
+function hs_country_locale_map() {
+    return [
+        'IN' => 'hi',
+        'AE' => 'ar', 'SA' => 'ar', 'QA' => 'ar', 'KW' => 'ar', 'OM' => 'ar', 'BH' => 'ar',
+        'EG' => 'ar', 'JO' => 'ar', 'IQ' => 'ar', 'LB' => 'ar', 'MA' => 'ar', 'DZ' => 'ar',
+        'US' => 'en', 'GB' => 'en', 'CA' => 'en', 'AU' => 'en', 'NZ' => 'en',
+    ];
+}
+
+function hs_set_locale($locale) {
+    $_SESSION['hs_locale'] = $locale;
+    setcookie('hs_locale', $locale, time() + (86400 * 180), '/');
+}
+
+function hs_detect_accept_language() {
+    $header = strtolower(trim($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''));
+    if ($header === '') {
+        return null;
+    }
+    $supported = hs_available_locales();
+    foreach (explode(',', $header) as $chunk) {
+        $chunk = trim(explode(';', $chunk)[0] ?? '');
+        if ($chunk === '') {
+            continue;
+        }
+        $primary = substr($chunk, 0, 2);
+        if (isset($supported[$primary])) {
+            return $primary;
+        }
+    }
+    return null;
+}
+
+function hs_detect_country_locale() {
+    $country = strtoupper(trim($_SERVER['HTTP_CF_IPCOUNTRY'] ?? ($_SERVER['GEOIP_COUNTRY_CODE'] ?? '')));
+    if ($country === '') {
+        return null;
+    }
+    $map = hs_country_locale_map();
+    return $map[$country] ?? null;
+}
+
+function hs_bootstrap_locale() {
+    $supported = hs_available_locales();
+    $requested = strtolower(trim($_GET['lang'] ?? ''));
+    if ($requested !== '' && isset($supported[$requested])) {
+        hs_set_locale($requested);
+        return $requested;
+    }
+
+    $cookie = strtolower(trim($_COOKIE['hs_locale'] ?? ''));
+    if ($cookie !== '' && isset($supported[$cookie])) {
+        $_SESSION['hs_locale'] = $cookie;
+        return $cookie;
+    }
+
+    $session = strtolower(trim($_SESSION['hs_locale'] ?? ''));
+    if ($session !== '' && isset($supported[$session])) {
+        return $session;
+    }
+
+    $countryLocale = hs_detect_country_locale();
+    if ($countryLocale && isset($supported[$countryLocale])) {
+        hs_set_locale($countryLocale);
+        return $countryLocale;
+    }
+
+    $acceptLocale = hs_detect_accept_language();
+    if ($acceptLocale && isset($supported[$acceptLocale])) {
+        hs_set_locale($acceptLocale);
+        return $acceptLocale;
+    }
+
+    hs_set_locale('en');
+    return 'en';
+}
+
+function hs_locale() {
+    return $_SESSION['hs_locale'] ?? 'en';
+}
+
+function hs_is_rtl() {
+    return hs_locale() === 'ar';
+}
+
+function hs_t($key) {
+    $dict = [
+        'en' => [
+            'international_news_network' => 'International News Network',
+            'global_edition' => 'Global Edition',
+            'live_desk_active' => 'Live Desk Active',
+            'home' => 'Home', 'india' => 'India', 'gcc' => 'GCC', 'world' => 'World', 'sports' => 'Sports',
+            'live_tv' => 'Live TV', 'search_stories' => 'Search stories', 'login' => 'Login', 'register' => 'Register',
+            'install_app' => 'Install App',
+        ],
+        'ml' => [
+            'international_news_network' => 'അന്താരാഷ്ട്ര വാർത്താ നെറ്റ്വർക്ക്',
+            'global_edition' => 'ഗ്ലോബൽ എഡിഷൻ',
+            'live_desk_active' => 'ലൈവ് ഡെസ്ക് സജീവമാണ്',
+            'home' => 'ഹോം', 'india' => 'ഇന്ത്യ', 'gcc' => 'ജിസിസി', 'world' => 'ലോകം', 'sports' => 'കായികം',
+            'live_tv' => 'ലൈവ് ടിവി', 'search_stories' => 'വാർത്തകൾ തിരയുക', 'login' => 'ലോഗിൻ', 'register' => 'രജിസ്റ്റർ',
+            'install_app' => 'ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക',
+        ],
+        'ar' => [
+            'international_news_network' => 'شبكة أخبار دولية',
+            'global_edition' => 'النسخة العالمية',
+            'live_desk_active' => 'مكتب البث المباشر نشط',
+            'home' => 'الرئيسية', 'india' => 'الهند', 'gcc' => 'الخليج', 'world' => 'العالم', 'sports' => 'الرياضة',
+            'live_tv' => 'البث المباشر', 'search_stories' => 'ابحث في الأخبار', 'login' => 'تسجيل الدخول', 'register' => 'إنشاء حساب',
+            'install_app' => 'تثبيت التطبيق',
+        ],
+        'hi' => [
+            'international_news_network' => 'अंतरराष्ट्रीय समाचार नेटवर्क',
+            'global_edition' => 'ग्लोबल एडिशन',
+            'live_desk_active' => 'लाइव डेस्क सक्रिय',
+            'home' => 'होम', 'india' => 'भारत', 'gcc' => 'जीसीसी', 'world' => 'विश्व', 'sports' => 'खेल',
+            'live_tv' => 'लाइव टीवी', 'search_stories' => 'समाचार खोजें', 'login' => 'लॉगिन', 'register' => 'रजिस्टर',
+            'install_app' => 'ऐप इंस्टॉल करें',
+        ],
+    ];
+    $locale = hs_locale();
+    return $dict[$locale][$key] ?? $dict['en'][$key] ?? $key;
+}
+
+hs_bootstrap_locale();
+
+function hs_url_without_lang($pathAndQuery = null) {
+    if ($pathAndQuery === null) {
+        $pathAndQuery = $_SERVER['REQUEST_URI'] ?? '/';
+    }
+    $parts = parse_url($pathAndQuery);
+    $path = $parts['path'] ?? '/';
+    $query = [];
+    if (!empty($parts['query'])) {
+        parse_str($parts['query'], $query);
+        unset($query['lang']);
+    }
+    $qs = http_build_query($query);
+    return $path . ($qs !== '' ? ('?' . $qs) : '');
+}
+
+function hs_hreflang_links($pathAndQuery = null) {
+    $basePath = hs_url_without_lang($pathAndQuery);
+    $separator = strpos($basePath, '?') !== false ? '&' : '?';
+    $links = [];
+    foreach (hs_available_locales() as $code => $label) {
+        $href = hs_base_url(ltrim($basePath, '/')) . $separator . 'lang=' . rawurlencode($code);
+        $links[] = '<link rel="alternate" hreflang="' . htmlspecialchars($code, ENT_QUOTES, 'UTF-8') . '" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
+    }
+    $xDefault = hs_base_url(ltrim($basePath, '/'));
+    $links[] = '<link rel="alternate" hreflang="x-default" href="' . htmlspecialchars($xDefault, ENT_QUOTES, 'UTF-8') . '">';
+    return implode("\n", $links);
+}
+
+function hs_base_url($path = '') {
+    return HS_BASE_URL . ltrim($path, '/');
+}
+
+function hs_routes(): array {
+    return [
+        'home' => '/',
+        'about' => 'about',
+        'contact' => 'contact',
+        'breaking' => 'breaking',
+        'trending' => 'trending',
+        'video' => 'video',
+        'gallery' => 'gallery',
+        'live' => 'live',
+        'profile' => 'profile',
+        'saved' => 'saved',
+        'notifications' => 'notifications',
+        'search' => 'search',
+        'search_query' => 'search/:query',
+        'post' => 'post/:slug',
+        'category' => 'category/:slug',
+        'tag' => 'tag/:slug',
+        'auth_login' => 'auth/login.php',
+        'auth_register' => 'auth/register.php',
+        'auth_logout' => 'auth/logout.php',
+        'auth_forgot' => 'auth/forgot.php',
+        'auth_reset' => 'auth/reset.php',
+        'admin_index' => 'admin/index.php',
+        'admin_login' => 'admin/login.php',
+        'admin_logout' => 'admin/logout.php',
+        'admin_homepage' => 'admin/homepage.php',
+        'admin_ads' => 'admin/ads.php',
+        'admin_seo' => 'admin/seo.php',
+        'admin_social' => 'admin/social.php',
+        'admin_social_dispatch' => 'admin/social_dispatch.php',
+        'admin_users' => 'admin/users.php',
+        'admin_logs' => 'admin/logs.php',
+        'admin_content_index' => 'admin/content/index.php',
+        'admin_content_articles' => 'admin/content/articles.php',
+        'admin_content_article_add' => 'admin/content/article_add.php',
+        'admin_content_article_edit' => 'admin/content/article_edit.php',
+        'admin_content_article_delete' => 'admin/content/article_delete.php',
+        'admin_content_categories' => 'admin/content/categories.php',
+        'admin_content_tags' => 'admin/content/tags.php',
+    ];
+}
+
+function hs_route(string $name, array $params = [], array $query = []): string {
+    $routes = hs_routes();
+    $path = $routes[$name] ?? '';
+    if ($path === '') {
+        return hs_base_url('/');
+    }
+    foreach ($params as $k => $v) {
+        $path = str_replace(':' . $k, rawurlencode((string)$v), $path);
+    }
+    $path = preg_replace('/:[A-Za-z0-9_]+/', '', $path);
+    $url = hs_base_url($path);
+    if (!empty($query)) {
+        $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($query);
+    }
+    return $url;
+}
+
+function hs_redirect_route(string $name, array $params = [], array $query = []): void {
+    header('Location: ' . hs_route($name, $params, $query));
+    exit;
+}
+
+function hs_post_url($slug) {
+    return hs_route('post', ['slug' => (string)$slug]);
+}
+
+function hs_category_url($slug) {
+    return hs_route('category', ['slug' => (string)$slug]);
+}
+
+function hs_tag_url($slug) {
+    return hs_route('tag', ['slug' => (string)$slug]);
+}
+
+function hs_search_url($query = '') {
+    $query = trim((string)$query);
+    if ($query === '') {
+        return hs_route('search');
+    }
+    return hs_route('search_query', ['query' => $query]);
+}
+
+function hs_admin_url($path = 'index.php', $query = '') {
+    $path = ltrim((string)$path, '/');
+    if ($path === '') {
+        $path = 'index.php';
+    } elseif (strpos($path, '.') === false) {
+        $path .= '.php';
+    }
+    $url = hs_base_url('admin/' . $path);
+    $query = ltrim((string)$query, '?');
+    return $query !== '' ? ($url . '?' . $query) : $url;
+}
+
+function hs_admin_content_url($path = 'index.php', $query = '') {
+    $path = ltrim((string)$path, '/');
+    if ($path === '') {
+        $path = 'index.php';
+    } elseif (strpos($path, '.') === false) {
+        $path .= '.php';
+    }
+    $url = hs_base_url('admin/content/' . $path);
+    $query = ltrim((string)$query, '?');
+    return $query !== '' ? ($url . '?' . $query) : $url;
+}
+
+function hs_admin_redirect($path = 'index.php', $query = '') {
+    header('Location: ' . hs_admin_url($path, $query));
+    exit;
+}
+
+function hs_auto_meta($type, array $payload, array $settings = []) {
+    $site = $settings['site_title'] ?? HS_APP_NAME;
+    $descDefault = $settings['seo_meta_description'] ?? ($settings['tagline'] ?? '');
+    if ($type === 'post') {
+        $title = trim(($payload['title'] ?? '') . ' | ' . $site);
+        $desc = trim((string)($payload['excerpt'] ?? $descDefault));
+        $keywords = trim((string)($settings['seo_meta_keywords'] ?? ''));
+        return compact('title', 'desc', 'keywords');
+    }
+    if ($type === 'taxonomy') {
+        $name = (string)($payload['name'] ?? 'News');
+        $title = trim($name . ' | ' . $site);
+        $desc = trim(($payload['description'] ?? '') ?: ($name . ' updates and breaking coverage from ' . $site));
+        $keywords = trim(($settings['seo_meta_keywords'] ?? '') . ', ' . $name, ', ');
+        return compact('title', 'desc', 'keywords');
+    }
+    if ($type === 'search') {
+        $q = trim((string)($payload['query'] ?? ''));
+        $prefix = $q !== '' ? ('Search: ' . $q) : 'Search';
+        $title = $prefix . ' | ' . $site;
+        $desc = $q !== '' ? ('Latest results for ' . $q . ' on ' . $site) : $descDefault;
+        $keywords = trim((string)($settings['seo_meta_keywords'] ?? ''));
+        return compact('title', 'desc', 'keywords');
+    }
+    return ['title' => $site, 'desc' => $descDefault, 'keywords' => (string)($settings['seo_meta_keywords'] ?? '')];
+}
+
+function hs_locale_to_og($locale = null) {
+    $locale = $locale ?: hs_locale();
+    $map = [
+        'en' => 'en_US',
+        'ml' => 'ml_IN',
+        'hi' => 'hi_IN',
+        'ar' => 'ar_AR',
+    ];
+    return $map[$locale] ?? 'en_US';
+}
+
+function hs_social_share_url($url, $title, $platform) {
+    $u = rawurlencode($url);
+    $t = rawurlencode($title);
+    switch ($platform) {
+        case 'facebook': return "https://www.facebook.com/sharer/sharer.php?u={$u}";
+        case 'whatsapp': return "https://api.whatsapp.com/send?text={$t}%20{$u}";
+        case 'x': return "https://twitter.com/intent/tweet?url={$u}&text={$t}";
+        case 'linkedin': return "https://www.linkedin.com/sharing/share-offsite/?url={$u}";
+        case 'telegram': return "https://t.me/share/url?url={$u}&text={$t}";
+        case 'email': return "mailto:?subject={$t}&body={$u}";
+        default: return $url;
+    }
+}
+
+function hs_view($view, $data = []) {
+    extract($data);
+    include __DIR__ . '/app/Views/' . $view . '.php';
+}
+
+function hs_pwa_head_tags() {
+    $manifest = hs_base_url('manifest.webmanifest');
+    $themeColor = '#0B1220';
+    $icon192 = hs_base_url('assets/images/icons/icon-192.svg');
+    return implode("\n", [
+        '<meta name="theme-color" content="' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '">',
+        '<meta name="mobile-web-app-capable" content="yes">',
+        '<meta name="apple-mobile-web-app-capable" content="yes">',
+        '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
+        '<meta name="apple-mobile-web-app-title" content="' . htmlspecialchars(HS_APP_NAME, ENT_QUOTES, 'UTF-8') . '">',
+        '<link rel="manifest" href="' . htmlspecialchars($manifest, ENT_QUOTES, 'UTF-8') . '">',
+        '<link rel="apple-touch-icon" href="' . htmlspecialchars($icon192, ENT_QUOTES, 'UTF-8') . '">',
+    ]);
+}
+
+function hs_settings() {
+    static $settings = null;
+    if ($settings !== null) return $settings;
+
+    $settings = [
+        'site_title' => HS_APP_NAME,
+        'tagline'    => 'News for India, GCC, Kerala & the World',
+        'logo'       => hs_base_url('assets/images/icons/icon-192.svg'),
+    ];
+
+    if (defined('HS_INSTALLED') && HS_INSTALLED) {
+        $res = mysqli_query(hs_db(), "SELECT `key`, `value` FROM hs_settings");
+        if ($res) {
+            while ($row = mysqli_fetch_assoc($res)) {
+                $settings[$row['key']] = $row['value'];
+            }
+        }
+    }
+    return $settings;
+}
+
+function hs_db_connected() {
+    return defined('HS_DB_CONNECTED') ? HS_DB_CONNECTED : (bool) hs_db();
+}
+
+function hs_db_error_message() {
+    return defined('HS_DB_ERROR') ? (string) HS_DB_ERROR : '';
+}
+
+function hs_query_value($sql, $default = 0) {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db_connected()) {
+        return $default;
+    }
+    $res = mysqli_query(hs_db(), $sql);
+    if (!$res) {
+        return $default;
+    }
+    $row = mysqli_fetch_row($res);
+    return $row[0] ?? $default;
+}
+
+function hs_count_posts_today() {
+    return (int) hs_query_value("SELECT COUNT(*) FROM hs_posts WHERE DATE(created_at)=CURDATE()", 0);
+}
+
+function hs_count_posts_by_status($status) {
+    $status = mysqli_real_escape_string(hs_db(), (string)$status);
+    return (int) hs_query_value("SELECT COUNT(*) FROM hs_posts WHERE status='{$status}'", 0);
+}
+
+function hs_count_breaking_active() {
+    return (int) hs_query_value("SELECT COUNT(*) FROM hs_posts WHERE status='published' AND is_breaking=1", 0);
+}
+
+function hs_latest_posts($limit = 8) {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED) {
+        return [];
+    }
+    $limit = max(1, (int)$limit);
+    $sql = "SELECT p.title, p.status, p.created_at, c.name AS category_name
+            FROM hs_posts p
+            LEFT JOIN hs_categories c ON c.id = p.category_id
+            ORDER BY p.created_at DESC
+            LIMIT {$limit}";
+    $res = mysqli_query(hs_db(), $sql);
+    if (!$res) {
+        return [];
+    }
+
+    $rows = [];
+    while ($row = mysqli_fetch_assoc($res)) {
+        $rows[] = $row;
+    }
+    return $rows;
+}
+
+
+
+function hs_role_permissions() {
+    return [
+        'admin' => ['dashboard.view','article.create','article.edit','article.publish','category.manage','tag.manage','user.manage','settings.manage','ads.manage','seo.manage'],
+        'editor' => ['dashboard.view','article.create','article.edit','article.publish','category.manage','tag.manage','seo.manage'],
+        'reporter' => ['dashboard.view','article.create','article.edit.own'],
+    ];
+}
+
+function hs_admin_role() {
+    return $_SESSION['hs_admin_role'] ?? 'reporter';
+}
+
+function hs_can($permission) {
+    if (!hs_is_admin_logged_in()) {
+        return false;
+    }
+    $role = hs_admin_role();
+    $map = hs_role_permissions();
+    $perms = $map[$role] ?? [];
+    return in_array($permission, $perms, true);
+}
+
+function hs_require_permission($permission) {
+    if (!hs_can($permission)) {
+        http_response_code(403);
+        echo 'Permission denied';
+        exit;
+    }
+}
+
+function hs_auth_attempt_key($email) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    return strtolower(trim($email)) . '|' . $ip;
+}
+
+function hs_auth_is_locked($email, $maxAttempts = 5, $lockSeconds = 900) {
+    $key = hs_auth_attempt_key($email);
+    $pool = $_SESSION['hs_auth_attempts'] ?? [];
+    if (empty($pool[$key])) {
+        return false;
+    }
+    $entry = $pool[$key];
+    if (($entry['count'] ?? 0) < $maxAttempts) {
+        return false;
+    }
+    $last = (int)($entry['last'] ?? 0);
+    return (time() - $last) < $lockSeconds;
+}
+
+function hs_auth_record_failure($email) {
+    $key = hs_auth_attempt_key($email);
+    if (empty($_SESSION['hs_auth_attempts'][$key])) {
+        $_SESSION['hs_auth_attempts'][$key] = ['count' => 0, 'last' => time()];
+    }
+    $_SESSION['hs_auth_attempts'][$key]['count']++;
+    $_SESSION['hs_auth_attempts'][$key]['last'] = time();
+}
+
+function hs_auth_clear_attempts($email) {
+    $key = hs_auth_attempt_key($email);
+    unset($_SESSION['hs_auth_attempts'][$key]);
+}
+
+function hs_top_categories($limit = 5) {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED) {
+        return [];
+    }
+    $limit = max(1, (int)$limit);
+    $sql = "SELECT c.name, COUNT(*) AS total
+            FROM hs_posts p
+            LEFT JOIN hs_categories c ON c.id = p.category_id
+            WHERE p.status='published'
+            GROUP BY p.category_id
+            ORDER BY total DESC
+            LIMIT {$limit}";
+    $res = mysqli_query(hs_db(), $sql);
+    if (!$res) {
+        return [];
+    }
+
+    $rows = [];
+    while ($row = mysqli_fetch_assoc($res)) {
+        $rows[] = $row;
+    }
+    return $rows;
+}
+
+
+
+function hs_csrf_token() {
+    if (empty($_SESSION['hs_csrf_token'])) {
+        $_SESSION['hs_csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['hs_csrf_token'];
+}
+
+function hs_csrf_input() {
+    $token = htmlspecialchars(hs_csrf_token(), ENT_QUOTES, 'UTF-8');
+    return '<input type="hidden" name="_csrf" value="' . $token . '">'
+        . '<input type="hidden" name="csrf_token" value="' . $token . '">';
+}
+
+function hs_csrf_validate() {
+    $token = $_POST['_csrf'] ?? ($_POST['csrf_token'] ?? '');
+    $valid = !empty($_SESSION['hs_csrf_token']) && hash_equals($_SESSION['hs_csrf_token'], $token);
+    if (!$valid) {
+        http_response_code(422);
+    }
+    return $valid;
+}
+
+function hs_log_event($level, $message, array $context = []) {
+    $dir = __DIR__ . '/writable/logs';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0777, true);
+    }
+    $payload = [
+        'time' => date('c'),
+        'level' => $level,
+        'message' => $message,
+        'context' => $context,
+    ];
+    @file_put_contents($dir . '/app.log', json_encode($payload, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
+}
+
+// Admin auth helpers
+function hs_is_admin_logged_in() {
+    return !empty($_SESSION['hs_admin_id']);
+}
+function hs_require_admin() {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED) {
+        header('Location: ' . hs_base_url('install/index.php'));
+        exit;
+    }
+    if (!hs_db_connected()) {
+        http_response_code(503);
+        echo '<h2>Database connection unavailable</h2>';
+        echo '<p>The admin panel cannot connect to MySQL right now. Verify DB credentials in <code>.env.php</code>.</p>';
+        $err = hs_db_error_message();
+        if ($err !== '') {
+            echo '<pre>' . htmlspecialchars($err, ENT_QUOTES, 'UTF-8') . '</pre>';
+        }
+        exit;
+    }
+    if (!hs_is_admin_logged_in()) {
+        header('Location: ' . hs_admin_url('login.php'));
+        exit;
+    }
+}
+
+// Frontend user helpers
+function hs_current_user() {
+    if (!defined('HS_INSTALLED') || !HS_INSTALLED || !hs_db_connected()) return null;
+    if (empty($_SESSION['hs_user_id'])) return null;
+    $id = (int) $_SESSION['hs_user_id'];
+    $res = mysqli_query(hs_db(), "SELECT id, name, email, is_premium FROM hs_frontend_users WHERE id = " . $id . " LIMIT 1");
+    return $res ? mysqli_fetch_assoc($res) : null;
+}
+function hs_require_user() {
+    if (!hs_current_user()) {
+        header('Location: ' . hs_base_url('auth/login.php'));
+        exit;
+    }
+}
